@@ -31,6 +31,7 @@ namespace CarryMe_Blitzcrank
 			Obj_AI_Base.OnBuffGain += Unit_OnGainBuff;
 			Obj_AI_Base.OnBuffLose += Unit_OnLoseBuff;
 			Obj_AI_Base.OnSpellCast += Unit_OnSpellCast;
+			Orbwalker.OnPostAttack += OnAfterAttack;
 		}
 
 		private static void Ondraw(EventArgs args)
@@ -58,8 +59,24 @@ namespace CarryMe_Blitzcrank
 		{
 			KillstealCheck();
 
-			if (R.IsReady() && Config.IsChecked(MenuBuilder.MenuNames.Misc, "use.R.autoAssist") &&
-				(!Config.IsChecked(MenuBuilder.MenuNames.Misc, "use.R.notInCombo") || !Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo)))
+			if (Config.GetValue(MenuBuilder.MenuNames.Misc, "autoassist.alwaysUseRCount") <= EntityManager.Heroes.Enemies.Count(u => !u.IsDead && u.IsValidTarget(R.Range)))
+			{
+				var notifie = new SimpleNotification("R AlwaysCast -> Cast R",
+								"Casting R couse i can hit " + EntityManager.Heroes.Enemies.Count(u => !u.IsDead && u.IsValidTarget(R.Range)) + " Enemys.");
+				Notifications.Show(notifie);
+				R.Cast();
+				return;
+			}
+
+			if (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.E.inrage"))
+			{
+				if (EntityManager.Heroes.Enemies.Any(u => !u.IsDead && u.IsValidTarget(ObjectManager.Player.GetAutoAttackRange(u) - 50) ))
+				{
+					E.Cast();
+				}
+			}
+
+			if (R.IsReady() && Config.IsChecked(MenuBuilder.MenuNames.Misc, "use.R.autoAssist") )
 			{
 				foreach (var target in EntityManager.Heroes.Enemies.Where(u => !u.IsDead && u.IsValidTarget(R.Range)))
 				{
@@ -76,15 +93,19 @@ namespace CarryMe_Blitzcrank
 						var attacks = Config.GetValue(MenuBuilder.MenuNames.Misc, "use.R.onAAleft");
 						for (var i = 1; i <= attacks; ++i)
 							Attackdamage += buddy.GetAutoAttackDamage(target, i == 1);
-						if (ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) + Attackdamage <= target.Health &&
+						if (ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) + Attackdamage >= target.Health &&
 							ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) < target.Health)
 						{
-							var notifie = new SimpleNotification("R Assister -> Cast R",
+							if ((Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Config.GetValue(MenuBuilder.MenuNames.Misc,"autoassist.HitCountInCombo") <= EntityManager.Heroes.Enemies.Count(u=> !u.IsDead && u.IsValidTarget(R.Range))) ||
+								(Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Config.GetValue(MenuBuilder.MenuNames.Misc, "autoassist.HitCountInHarras") <= EntityManager.Heroes.Enemies.Count(u => !u.IsDead && u.IsValidTarget(R.Range))))
+							{
+								var notifie = new SimpleNotification("R Assister -> Cast R",
 								"My Buddy need just to do " +
 								((int)(target.Health - ObjectManager.Player.GetSpellDamage(target, SpellSlot.R)) + "Damage"));
-							Notifications.Show(notifie);
-							R.Cast();
-							return;
+								Notifications.Show(notifie);
+								R.Cast();
+								return;
+							}
 						}
 					}
 				}
@@ -223,6 +244,19 @@ namespace CarryMe_Blitzcrank
 				elements.Combinations(k - 1).Select(c => (new[] { e }).Concat(c)));
 		}
 
+		private static void OnAfterAttack(AttackableUnit target, EventArgs args)
+		{
+			if (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.E.afterAA") && E.IsReady())
+			{
+				var LastTarget = ObjectManager.Get<AIHeroClient>().FirstOrDefault(u => u.NetworkId == target.NetworkId && !u.IsDead);
+				if (LastTarget != null)
+				{
+					E.Cast();
+					Core.DelayAction(() => Player.IssueOrder(GameObjectOrder.AttackUnit, LastTarget), 100);
+				}
+			}
+		}
+
 		private static void Unit_OnGainBuff(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
 		{
 			if (!sender.IsEnemy || sender.IsMinion || sender.IsMonster || !args.Buff.Caster.IsMe ||
@@ -247,7 +281,7 @@ namespace CarryMe_Blitzcrank
 				return;
 			if (!sender.IsDead && sender.IsEnemy && !sender.IsMinion && !sender.IsMonster && args.Buff.Caster.IsMe && args.Buff.Name == "rocketgrab2")
 			{
-				Player.IssueOrder(GameObjectOrder.AttackUnit, sender);
+				Core.DelayAction(() => Player.IssueOrder(GameObjectOrder.AttackUnit, sender), 100);
 			}
 		}
 

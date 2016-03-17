@@ -38,9 +38,11 @@ namespace CarryMe_Blitzcrank
 			menuBuilder.AddCheckBox(MenuBuilder.MenuNames.Misc, "Use E if Q hit", "use.E", true);
 			menuBuilder.AddLabel(MenuBuilder.MenuNames.Misc, "AutoAssist R info: Your Buddy must be in Autoattackrange + AdditionalRange");
 			menuBuilder.AddCheckBox(MenuBuilder.MenuNames.Misc, "AutoAssist R useage", "use.R.autoAssist", true);
-			menuBuilder.AddCheckBox(MenuBuilder.MenuNames.Misc, "deaktivate in Combo", "use.R.notInCombo", true);
+			menuBuilder.AddSlider(MenuBuilder.MenuNames.Misc, "AutoAssist R must hit Min {0} Enemys in Combo", "autoassist.HitCountInCombo", 2, 1, 5);
+			menuBuilder.AddSlider(MenuBuilder.MenuNames.Misc, "AutoAssist R must hit Min {0} Enemys in Harras", "autoassist.HitCountInHarras", 1, 1, 5);
 			menuBuilder.AddSlider(MenuBuilder.MenuNames.Misc, "Buddy AutoAttackrange + {0} = totalRange ", "additional.buddyrange", 200, 0, 300);
 			menuBuilder.AddSlider(MenuBuilder.MenuNames.Misc, "Use R if your Buddy can kill within {0} autoattack hits", "use.R.onAAleft", 2, 1, 5);
+			menuBuilder.AddSlider(MenuBuilder.MenuNames.Misc, "If R will Hit {0} Enemys always cast", "autoassist.alwaysUseRCount", 3, 1, 5);
 
 			menuBuilder.AddMenu(MenuBuilder.MenuNames.Killsteal);
 			menuBuilder.AddCheckBox(MenuBuilder.MenuNames.Killsteal, "Use Q", "use.Q", true);

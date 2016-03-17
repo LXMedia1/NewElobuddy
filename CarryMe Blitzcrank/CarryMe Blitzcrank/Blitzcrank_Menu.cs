@@ -20,8 +20,8 @@ namespace CarryMe_Blitzcrank
 			menuBuilder.AddCheckBox(Orbwalker.ActiveModes.Combo, "Use E if Q hit", "use.E", true);
 			menuBuilder.AddLabel(Orbwalker.ActiveModes.Combo, "Info: You cant have both activated");
 			menuBuilder.AddRadioBox(Orbwalker.ActiveModes.Combo, false,
-				new MenuBuilder.RadioBox("Use E after Autoattack", "use.E.afterAA", true),
-				new MenuBuilder.RadioBox("Use E if in Range", "use.E.inrage", false));
+				new MenuBuilder.RadioBox("Combo Use E after Autoattack", "use.E.afterAA", false),
+				new MenuBuilder.RadioBox("Combo Use E if in Range", "use.E.inrage", true));
 			menuBuilder.AddLabel(Orbwalker.ActiveModes.Combo, "Advanged Rules", true);
 			menuBuilder.AddSlider(Orbwalker.ActiveModes.Combo, "Q Maximum Cast Range: {0}","modiefied.Q.range.max", 1000, 0, (int)Blitzcrank.Q.Range);
 			menuBuilder.AddSlider(Orbwalker.ActiveModes.Combo, "Q Minimum Cast Range: {0}", "modiefied.Q.range.min", 100, 0, 500);
@@ -30,6 +30,10 @@ namespace CarryMe_Blitzcrank
 			menuBuilder.AddLabel(Orbwalker.ActiveModes.Harass, "Basic Rules", true);
 			menuBuilder.AddCheckBox(Orbwalker.ActiveModes.Harass, "Use Q", "use.Q", false);
 			menuBuilder.AddCheckBox(Orbwalker.ActiveModes.Harass, "Use E if Q hit", "use.E", true);
+			menuBuilder.AddLabel(Orbwalker.ActiveModes.Harass, "Info: You cant have both activated");
+			menuBuilder.AddRadioBox(Orbwalker.ActiveModes.Harass, false,
+				new MenuBuilder.RadioBox("Harras Use E after Autoattack", "use.E.afterAA", true),
+				new MenuBuilder.RadioBox("Harras Use E if in Range", "use.E.inrage", false));
 			menuBuilder.AddLabel(Orbwalker.ActiveModes.Harass, "Advanged Rules", true);
 			menuBuilder.AddSlider(Orbwalker.ActiveModes.Harass, "Q Maximum Cast Range: {0}", "modiefied.Q.range.max", 1000, 0, (int)Blitzcrank.Q.Range);
 			menuBuilder.AddSlider(Orbwalker.ActiveModes.Harass, "Q Minimum Cast Range: {0}", "modiefied.Q.range.min", 100, 0, 500);

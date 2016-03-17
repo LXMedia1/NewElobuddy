@@ -68,9 +68,9 @@ namespace CarryMe_Blitzcrank
 				return;
 			}
 
-			if (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.E.inrage"))
+			if (E.IsReady() && (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.E.inrage") || Config.IsChecked(Orbwalker.ActiveModes.Harass, "use.E.inrage")))
 			{
-				if (EntityManager.Heroes.Enemies.Any(u => !u.IsDead && u.IsValidTarget(ObjectManager.Player.GetAutoAttackRange(u) - 50) ))
+				if (EntityManager.Heroes.Enemies.Any(u => !u.IsDead && u.IsValidTarget(ObjectManager.Player.GetAutoAttackRange(u) - 50)))
 				{
 					E.Cast();
 				}
@@ -111,7 +111,7 @@ namespace CarryMe_Blitzcrank
 				}
 			}
 
-			if (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.Q"))
+			if (Q.IsReady() && (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.Q")))
 			{
 				var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
 				if (target != null && target.IsWithinDistance(Config.GetValue(Orbwalker.ActiveModes.Combo, "modiefied.Q.range.min"), Config.GetValue(Orbwalker.ActiveModes.Combo, "modiefied.Q.range.max")))
@@ -122,7 +122,7 @@ namespace CarryMe_Blitzcrank
 				}
 			}
 
-			if (Config.IsChecked(Orbwalker.ActiveModes.Harass, "use.Q"))
+			if (Q.IsReady() && Config.IsChecked(Orbwalker.ActiveModes.Harass, "use.Q"))
 			{
 				var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
 				if (target != null && target.IsWithinDistance(Config.GetValue(Orbwalker.ActiveModes.Harass, "modiefied.Q.range.min"), Config.GetValue(Orbwalker.ActiveModes.Harass, "modiefied.Q.range.max")))
@@ -246,7 +246,7 @@ namespace CarryMe_Blitzcrank
 
 		private static void OnAfterAttack(AttackableUnit target, EventArgs args)
 		{
-			if (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.E.afterAA") && E.IsReady())
+			if (E.IsReady() && (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.E.afterAA") || Config.IsChecked(Orbwalker.ActiveModes.Harass, "use.E.afterAA")))
 			{
 				var LastTarget = ObjectManager.Get<AIHeroClient>().FirstOrDefault(u => u.NetworkId == target.NetworkId && !u.IsDead);
 				if (LastTarget != null)

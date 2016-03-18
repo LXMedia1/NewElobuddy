@@ -57,15 +57,16 @@ namespace CarryMe_Blitzcrank
 
 		private static void OnUpdate(EventArgs args)
 		{
+			if (ObjectManager.Player.IsDead)
+				return;
 			KillstealCheck();
 
-			if (Config.GetValue(MenuBuilder.MenuNames.Misc, "autoassist.alwaysUseRCount") <= EntityManager.Heroes.Enemies.Count(u => !u.IsDead && u.IsValidTarget(R.Range)))
+			if (R.IsReady() && Config.GetValue(MenuBuilder.MenuNames.Misc, "autoassist.alwaysUseRCount") <= EntityManager.Heroes.Enemies.Count(u => !u.IsDead && u.IsValidTarget(R.Range)))
 			{
 				var notifie = new SimpleNotification("R AlwaysCast -> Cast R",
 								"Casting R couse i can hit " + EntityManager.Heroes.Enemies.Count(u => !u.IsDead && u.IsValidTarget(R.Range)) + " Enemys.");
 				Notifications.Show(notifie);
 				R.Cast();
-				return;
 			}
 
 			if (E.IsReady() && (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.E.inrage") || Config.IsChecked(Orbwalker.ActiveModes.Harass, "use.E.inrage")))

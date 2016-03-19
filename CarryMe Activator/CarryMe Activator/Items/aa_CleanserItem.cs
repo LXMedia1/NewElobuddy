@@ -22,7 +22,7 @@ namespace CarryMe_Activator.Items
 		public aa_CleanserItem()
 		{
 			Menu = CleanserItems.Menu.AddSubMenu(Name, IdentBase);
-			Menu.Add(IdentBase + ".disable", new CheckBox("Disable " + Name + " totally"));
+			Menu.Add(IdentBase + ".disable", new CheckBox("Disable " + Name + " totally", false));
 			Menu.AddLabel("if Active in Combo is unchecked its Always Active");
 			Menu.Add(IdentBase + ".justActiveInCombo", new CheckBox("Just Active in Combo", false));
 

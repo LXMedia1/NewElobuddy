@@ -14,15 +14,15 @@ namespace CarryMe_Activator.Items
 	{
 		public static ItemId Id = ItemId.Zekes_Harbinger;
 		public static string Name = Id.ToString().Replace("_", " ");
-		public static string IdentBase = "cm.offitems." + Name.ToLower().Replace(" ", ".");
+		public static string IdentBase = "cm.situation." + Name.ToLower().Replace(" ", ".");
 		public static Menu Menu;
 		public bool ActivatedMessage;
 		public int DelayTick;
 
 		public Zekes_Harbinger()
 		{
-			Menu = OffensiveItems.Menu.AddSubMenu(Name, IdentBase);
-			Menu.Add(IdentBase + ".disable", new CheckBox("Disable " + Name + " totally"));
+			Menu = SituationalItems.Menu.AddSubMenu(Name, IdentBase);
+			Menu.Add(IdentBase + ".disable", new CheckBox("Disable " + Name + " totally", false));
 			Menu.AddSeparator();
 			Menu.Add(IdentBase + ".autoBind", new CheckBox("AutoBind to Strongest Buddy"));
 			Menu.AddLabel("Additional Setting");

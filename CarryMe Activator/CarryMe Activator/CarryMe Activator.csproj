@@ -83,8 +83,12 @@
   <ItemGroup>
     <Compile Include="Activator.cs" />
     <Compile Include="Classes\Hero.cs" />
+    <Compile Include="Items\Banner_of_Command.cs" />
+    <Compile Include="Items\Blade_of_the_Ruined_King.cs" />
+    <Compile Include="Items\Bilgewater_Cutlass.cs" />
     <Compile Include="Items\Zekes_Harbinger.cs" />
     <Compile Include="Items\Guardians_Horn.cs" />
+    <Compile Include="SituationalItems.cs" />
     <Compile Include="OffensiveItems.cs" />
     <Compile Include="CleanserItems.cs" />
     <Compile Include="DB\Buff.cs" />

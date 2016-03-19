@@ -10,27 +10,23 @@ using EloBuddy.SDK.Notifications;
 
 namespace CarryMe_Activator.Items
 {
-	internal class aa_OffensiveItem
+	internal class Banner_of_Command
 	{
-		public static ItemId Id = ItemId.Guardians_Horn;
+		public static ItemId Id = ItemId.Banner_of_Command;
 		public static string Name = Id.ToString().Replace("_", " ");
-		public static string IdentBase = "cm.offitems." + Name.ToLower().Replace(" ", ".");
+		public static string IdentBase = "cm.situation." + Name.ToLower().Replace(" ", ".");
 		public static Menu Menu;
 		public bool ActivatedMessage;
 		public int DelayTick;
 
-		public aa_OffensiveItem()
+		public Banner_of_Command()
 		{
-			Menu = CleanserItems.Menu.AddSubMenu(Name, IdentBase);
-			Menu.Add(IdentBase + ".disable", new CheckBox("Disable " + Name + " totally", false));
+			Menu = SituationalItems.Menu.AddSubMenu(Name, IdentBase);
+			Menu.Add(IdentBase + ".disable", new CheckBox("Disable " + Name + " totally",false));
 			Menu.AddSeparator();
 			Menu.Add(IdentBase + ".ActiveInCombo", new CheckBox("Active in Combo"));
-			Menu.Add(IdentBase + ".Combo.UseIfEnemyHPbelow", new Slider("Use if Enemy HP < {0}%", 90));
-			Menu.AddSeparator();
-			Menu.Add(IdentBase + ".ActiveInHarras", new CheckBox("Active in Harras", false));
-			Menu.Add(IdentBase + ".Harras.UseIfEnemyHPbelow", new Slider("Use if Enemy HP < {0}%", 70));
+			Menu.Add(IdentBase + ".ActiveInHarras", new CheckBox("Active in Harras"));
 			Menu.AddLabel("Additional Setting");
-			Menu.Add(IdentBase + ".useForKS", new CheckBox("Use For KS"));
 			Menu.Add(IdentBase + ".CheckDelay", new Slider("Humanizer Reaction (will react max. {0} ms later)", 0, 0, 500));
 			Game.OnUpdate += GameOnUpdate;
 		}
@@ -50,19 +46,20 @@ namespace CarryMe_Activator.Items
 				if (DelayTick + Menu[IdentBase + ".CheckDelay"].Cast<Slider>().CurrentValue < Core.GameTickCount)
 				{
 					DelayTick = Core.GameTickCount;
-					if (Menu[IdentBase + ".useForKS"].Cast<CheckBox>().CurrentValue)
-					{
-						
-					}
+					var target = TargetSelector.GetTarget(650,DamageType.Physical);
 					if (Menu[IdentBase + ".ActiveInCombo"].Cast<CheckBox>().CurrentValue &&
-					    Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
+						Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
 					{
-						
+						var SiegeMinion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(u => !u.IsDead && u.IsValidTarget(1100) && u.BaseSkinName.Contains("MinionSiege") && u.Team == ObjectManager.Player.Team);
+						if (SiegeMinion != null)
+							Item.UseItem(Id, SiegeMinion);
 					}
 					if (Menu[IdentBase + ".ActiveInHarras"].Cast<CheckBox>().CurrentValue &&
 						Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
 					{
-
+						var SiegeMinion = ObjectManager.Get<Obj_AI_Minion>().FirstOrDefault(u => !u.IsDead && u.IsValidTarget(1100) && u.BaseSkinName.Contains("MinionSiege") && u.Team == ObjectManager.Player.Team);
+						if (SiegeMinion != null)
+							Item.UseItem(Id, SiegeMinion);
 					}
 				}
 			}

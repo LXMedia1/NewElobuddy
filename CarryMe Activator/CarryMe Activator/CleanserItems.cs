@@ -31,7 +31,14 @@ namespace CarryMe_Activator
 
 		private static void CreateCheckboxForHero(EloBuddy.AIHeroClient buddy)
 		{
-			Menu.Add("cm.cleanser.active.for." + buddy.ChampionName.ToLower(), new CheckBox("Use on " + buddy.ChampionName));
+			try
+			{
+				Menu.Add("cm.cleanser.active.for." + buddy.ChampionName.ToLower(), new CheckBox("Use on " + buddy.ChampionName));
+			}
+			catch (Exception)
+			{
+				// Iggnored ( blame Elobuddy SDK for adding all champs double into Entitiemanager ... ) PM me if this is fixed 
+			}
 		}
 
 		public static bool IsActiveForHero(EloBuddy.AIHeroClient buddy)

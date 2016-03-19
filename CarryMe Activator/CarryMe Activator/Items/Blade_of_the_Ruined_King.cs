@@ -10,16 +10,16 @@ using EloBuddy.SDK.Notifications;
 
 namespace CarryMe_Activator.Items
 {
-	internal class Guardians_Horn
+	internal class Blade_of_the_Ruined_King
 	{
-		public static ItemId Id = ItemId.Guardians_Horn;
+		public static ItemId Id = ItemId.Blade_of_the_Ruined_King;
 		public static string Name = Id.ToString().Replace("_", " ");
 		public static string IdentBase = "cm.offitems." + Name.ToLower().Replace(" ", ".");
 		public static Menu Menu;
 		public bool ActivatedMessage;
 		public int DelayTick;
 
-		public Guardians_Horn()
+		public Blade_of_the_Ruined_King()
 		{
 			Menu = OffensiveItems.Menu.AddSubMenu(Name, IdentBase);
 			Menu.Add(IdentBase + ".disable", new CheckBox("Disable " + Name + " totally", false));
@@ -27,10 +27,14 @@ namespace CarryMe_Activator.Items
 			Menu.Add(IdentBase + ".ActiveInCombo", new CheckBox("Active in Combo"));
 			Menu.Add(IdentBase + ".Combo.UseIfEnemyHPbelow", new Slider("Use if Enemy HP < {0}%", 90));
 			Menu.Add(IdentBase + ".Combo.UseIfHeroHPbelow", new Slider("Use if Hero HP < {0}%", 50));
+			Menu.Add(IdentBase + ".Combo.Overhealcheck", new CheckBox("Not Use if Overheal"));
 			Menu.AddSeparator();
 			Menu.Add(IdentBase + ".ActiveInHarras", new CheckBox("Active in Harras", false));
 			Menu.Add(IdentBase + ".Harras.UseIfEnemyHPbelow", new Slider("Use if Enemy HP < {0}%", 70));
 			Menu.Add(IdentBase + ".Harras.UseIfHeroHPbelow", new Slider("Use if Hero HP < {0}%", 30));
+			Menu.Add(IdentBase + ".Harras.Overhealcheck", new CheckBox("Not Use if Overheal"));
+			Menu.AddSeparator();
+			Menu.Add(IdentBase + ".Killstealer", new CheckBox("Use as Killstealer"));
 			Menu.AddSeparator();
 			Menu.AddLabel("Additional Setting");
 			Menu.Add(IdentBase + ".CheckDelay", new Slider("Humanizer Reaction (will react max. {0} ms later)", 0, 0, 500));
@@ -52,7 +56,20 @@ namespace CarryMe_Activator.Items
 				if (DelayTick + Menu[IdentBase + ".CheckDelay"].Cast<Slider>().CurrentValue < Core.GameTickCount)
 				{
 					DelayTick = Core.GameTickCount;
-					var target = TargetSelector.GetTarget(650,DamageType.Physical);
+					var target = TargetSelector.GetTarget(550,DamageType.Physical);
+					if (Menu[IdentBase + ".Killstealer"].Cast<CheckBox>().CurrentValue)
+					{
+						foreach (var unit in ObjectManager.Get<AIHeroClient>().Where(u => !u.IsDead && u.IsValidTarget(550) ))
+						{
+							var damage = (unit.MaxHealth * 0.1f);
+							if (damage < 100)
+								damage = 100;
+							var realdmgamount = ObjectManager.Player.CalculateDamageOnUnit(target, DamageType.Physical, damage, true, true);
+							if (!(realdmgamount >= unit.Health)) continue;
+							Item.UseItem(Id, unit);
+							return;
+						}
+					}
 					if (Menu[IdentBase + ".ActiveInCombo"].Cast<CheckBox>().CurrentValue &&
 						Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo))
 					{
@@ -61,7 +78,12 @@ namespace CarryMe_Activator.Items
 							if (Menu[IdentBase + ".Combo.UseIfEnemyHPbelow"].Cast<Slider>().CurrentValue >= target.HealthPercent ||
 								Menu[IdentBase + ".Combo.UseIfHeroHPbelow"].Cast<Slider>().CurrentValue >= target.HealthPercent)
 							{
-								Item.UseItem(Id);
+								var damage = (target.MaxHealth*0.1f);
+								if (damage < 100)
+									damage = 100;
+								var realdmgamount = ObjectManager.Player.CalculateDamageOnUnit(target, DamageType.Physical, damage, true, true);
+								if (!Menu[IdentBase + ".Combo.Overhealcheck"].Cast<CheckBox>().CurrentValue || realdmgamount + ObjectManager.Player.Health <= ObjectManager.Player.MaxHealth)
+									Item.UseItem(Id, target);
 							}
 						}
 					}
@@ -73,7 +95,12 @@ namespace CarryMe_Activator.Items
 							if (Menu[IdentBase + ".Harras.UseIfEnemyHPbelow"].Cast<Slider>().CurrentValue >= target.HealthPercent ||
 								Menu[IdentBase + ".Harras.UseIfHeroHPbelow"].Cast<Slider>().CurrentValue >= target.HealthPercent)
 							{
-								Item.UseItem(Id);
+								var damage = (target.MaxHealth * 0.1f);
+								if (damage < 100)
+									damage = 100;
+								var realdmgamount = ObjectManager.Player.CalculateDamageOnUnit(target, DamageType.Physical, damage, true, true);
+								if (!Menu[IdentBase + ".Combo.Overhealcheck"].Cast<CheckBox>().CurrentValue || realdmgamount + ObjectManager.Player.Health <= ObjectManager.Player.MaxHealth)
+									Item.UseItem(Id, target);
 							}
 						}
 					}

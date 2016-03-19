@@ -11,17 +11,16 @@ using EloBuddy.SDK.Menu.Values;
 
 namespace CarryMe_Activator
 {
-	class OffensiveItems
+	class SituationalItems
 	{
 		public static Menu Menu;
 		internal static void Load()
 		{
-			Menu = MainMenu.AddMenu("CM OffensiveItems", "cm.offitems", "CarryMe OffensiveItmes by Lekks.");
-			Menu.Add("cm.offitems.deactivate", new CheckBox("Disable OffensiveItems Totally", false));
+			Menu = MainMenu.AddMenu("CM SituationItems", "cm.situation", "CarryMe SituationItems by Lekks.");
+			Menu.Add("cm.situation.deactivate", new CheckBox("Disable SituationItems Totally", false));
 
-			new Items.Bilgewater_Cutlass();
-			new Items.Blade_of_the_Ruined_King();
-			new Items.Guardians_Horn();
+			new Items.Banner_of_Command();
+			new Items.Zekes_Harbinger();
 
 		}
 

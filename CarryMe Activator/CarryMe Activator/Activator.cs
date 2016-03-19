@@ -57,6 +57,7 @@ namespace CarryMe_Activator
 			}
 			CleanserItems.Load();
 			OffensiveItems.Load();
+			SituationalItems.Load();
 			
 		}
 	}

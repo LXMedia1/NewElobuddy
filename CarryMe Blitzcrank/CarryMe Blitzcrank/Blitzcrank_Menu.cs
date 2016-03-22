@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using CarryMe_Blitzcrank.Basics;
+using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Notifications;
@@ -13,6 +16,20 @@ namespace CarryMe_Blitzcrank
 		{
 			var menuBuilder = new MenuBuilder();
 			menuBuilder.AddMenu();
+		
+			menuBuilder.AddMenu(MenuBuilder.MenuNames.BlackList);
+			menuBuilder.AddLabel(MenuBuilder.MenuNames.BlackList, "If a Champion is Checked he will not Grab them");
+			foreach (var enemy in ObjectManager.Get<AIHeroClient>().Where(u => u.IsEnemy))
+			{
+				try
+				{
+					menuBuilder.AddCheckBox(MenuBuilder.MenuNames.BlackList, enemy.ChampionName, "blacklist." + enemy.ChampionName, false);
+				}
+				catch (Exception)
+				{
+					// iggnored some champ double in that list...
+				}
+			}
 
 			menuBuilder.AddMenu(Orbwalker.ActiveModes.Combo);
 			menuBuilder.AddLabel(Orbwalker.ActiveModes.Combo, "Basic Rules", true);
@@ -56,6 +73,10 @@ namespace CarryMe_Blitzcrank
 			menuBuilder.AddMenu(MenuBuilder.MenuNames.Drawing);
 			menuBuilder.AddCheckBox(MenuBuilder.MenuNames.Drawing, "Draw Q Range", "draw.Q.range", true);
 			menuBuilder.AddCheckBox(MenuBuilder.MenuNames.Drawing, "Draw Q Prediction", "draw.Q.prediction", true);
+
+			menuBuilder.AddMenu(MenuBuilder.MenuNames.Anti_FPS_Drop);
+			menuBuilder.AddLabel(MenuBuilder.MenuNames.Anti_FPS_Drop, "just use OnTickMode if you have FPS Problems ( it reduce the needed ressources but also the performance )");
+			menuBuilder.AddCheckBox(MenuBuilder.MenuNames.Anti_FPS_Drop, "Use OnTickMode", "antiFPS.useOnTick", false);
 
 			return menuBuilder;
 		}

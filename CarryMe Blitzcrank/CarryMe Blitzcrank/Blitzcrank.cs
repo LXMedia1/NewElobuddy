@@ -22,19 +22,25 @@ namespace CarryMe_Blitzcrank
 		public static Spell.Active W = new Spell.Active(SpellSlot.W);
 		public static Spell.Active E = new Spell.Active(SpellSlot.E);
 		public static Spell.Active R = new Spell.Active(SpellSlot.R, 600);
+
+		public static Obj_AI_Base QGlobalTarget;
+		public static Prodiction.ProdictResult QGlobalPred;
+
+		public static int NotifieDelay;
 		internal static void Load()
 		{
 			Config = Blitzcrank_Menu.Load();
 
 			Game.OnUpdate += OnUpdate;
-			Drawing.OnDraw += Ondraw;
+			Game.OnTick += OnTick;
+			Drawing.OnDraw += OnDraw;
 			Obj_AI_Base.OnBuffGain += Unit_OnGainBuff;
 			Obj_AI_Base.OnBuffLose += Unit_OnLoseBuff;
 			Obj_AI_Base.OnSpellCast += Unit_OnSpellCast;
 			Orbwalker.OnPostAttack += OnAfterAttack;
 		}
 
-		private static void Ondraw(EventArgs args)
+		private static void OnDraw(EventArgs args)
 		{
 			if (Config.IsChecked(MenuBuilder.MenuNames.Drawing, "draw.Q.range"))
 			{
@@ -44,18 +50,37 @@ namespace CarryMe_Blitzcrank
 
 			if (Config.IsChecked(MenuBuilder.MenuNames.Drawing, "draw.Q.prediction"))
 			{
-				var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
+				var  target = TargetSelector.GetTarget(ObjectManager.Get<AIHeroClient>().Where(u => u.IsEnemy && !u.IsDead && u.IsValidTarget(Q.Range) && !Config.IsChecked(MenuBuilder.MenuNames.BlackList, u.ChampionName)), DamageType.Magical);
 				if (target != null)
 				{
 					var pred = Q.GetProdiction(target);
 					var rect = new Geometry.Polygon.Rectangle(ObjectManager.Player.Position, pred.CastPosition, Q.Width);
-					rect.Draw((pred.Hitchance >= HitChance.High) ? Color.Blue : Color.Brown);
+					rect.Draw((pred.Hitchance >= HitChance.High && Q.IsReady()) ? Color.Blue : Color.Brown);
 					Drawing.DrawText(pred.CastPosition.WorldToScreen(), Color.Wheat, pred.Hitchance.ToString(), 2);
-				}
+				}			
 			}
 		}
 
 		private static void OnUpdate(EventArgs args)
+		{
+			if (Config.IsChecked(MenuBuilder.MenuNames.Anti_FPS_Drop, "antiFPS.useOnTick"))
+				return;
+			OnLogicRun();
+		}
+		private static void OnTick(EventArgs args)
+		{
+			if (!Config.IsChecked(MenuBuilder.MenuNames.Anti_FPS_Drop, "antiFPS.useOnTick"))
+				return;
+			if (NotifieDelay + 15000 < Core.GameTickCount && Game.FPS > 100)
+			{
+				Chat.Print("CarryMe BlitzCrank: Please use framelock 60 fps");
+				Chat.Print("CarryMe BlitzCrank: You find it in League Settings.");
+				NotifieDelay = Core.GameTickCount;
+			}
+			OnLogicRun();
+		}
+
+		private static void OnLogicRun()
 		{
 			if (ObjectManager.Player.IsDead)
 				return;
@@ -77,7 +102,7 @@ namespace CarryMe_Blitzcrank
 				}
 			}
 
-			if (R.IsReady() && Config.IsChecked(MenuBuilder.MenuNames.Misc, "use.R.autoAssist") )
+			if (R.IsReady() && Config.IsChecked(MenuBuilder.MenuNames.Misc, "use.R.autoAssist"))
 			{
 				foreach (var target in EntityManager.Heroes.Enemies.Where(u => !u.IsDead && u.IsValidTarget(R.Range)))
 				{
@@ -97,7 +122,7 @@ namespace CarryMe_Blitzcrank
 						if (ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) + Attackdamage >= target.Health &&
 							ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) < target.Health)
 						{
-							if ((Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Config.GetValue(MenuBuilder.MenuNames.Misc,"autoassist.HitCountInCombo") <= EntityManager.Heroes.Enemies.Count(u=> !u.IsDead && u.IsValidTarget(R.Range))) ||
+							if ((Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Combo) && Config.GetValue(MenuBuilder.MenuNames.Misc, "autoassist.HitCountInCombo") <= EntityManager.Heroes.Enemies.Count(u => !u.IsDead && u.IsValidTarget(R.Range))) ||
 								(Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass) && Config.GetValue(MenuBuilder.MenuNames.Misc, "autoassist.HitCountInHarras") <= EntityManager.Heroes.Enemies.Count(u => !u.IsDead && u.IsValidTarget(R.Range))))
 							{
 								var notifie = new SimpleNotification("R Assister -> Cast R",
@@ -111,30 +136,37 @@ namespace CarryMe_Blitzcrank
 					}
 				}
 			}
-
-			if (Q.IsReady() && (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.Q")))
+			if (Q.IsReady())
 			{
-				var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
-				if (target != null && target.IsWithinDistance(Config.GetValue(Orbwalker.ActiveModes.Combo, "modiefied.Q.range.min"), Config.GetValue(Orbwalker.ActiveModes.Combo, "modiefied.Q.range.max")))
+				QGlobalTarget = TargetSelector.GetTarget(ObjectManager.Get<AIHeroClient>().Where(u => u.IsEnemy && !u.IsDead && u.IsValidTarget(Q.Range) && !Config.IsChecked(MenuBuilder.MenuNames.BlackList, u.ChampionName)), DamageType.Magical);
+				if (QGlobalTarget != null)
 				{
-					var pred = Q.GetProdiction(target);
-					if (pred.Hitchance >= HitChance.High)
-						Q.Cast(pred.CastPosition);
+					QGlobalPred = Q.GetProdiction(QGlobalTarget);
+					if (Config.IsChecked(Orbwalker.ActiveModes.Combo, "use.Q"))
+					{
+						if (QGlobalTarget.IsWithinDistance(Config.GetValue(Orbwalker.ActiveModes.Combo, "modiefied.Q.range.min"), Config.GetValue(Orbwalker.ActiveModes.Combo, "modiefied.Q.range.max")))
+						{
+							if (QGlobalPred.Hitchance >= HitChance.High)
+								Q.Cast(QGlobalPred.CastPosition);
+						}
+					}
+
+					if (Config.IsChecked(Orbwalker.ActiveModes.Harass, "use.Q"))
+					{
+						if (QGlobalTarget.IsWithinDistance(Config.GetValue(Orbwalker.ActiveModes.Harass, "modiefied.Q.range.min"), Config.GetValue(Orbwalker.ActiveModes.Harass, "modiefied.Q.range.max")))
+						{
+							if (QGlobalPred.Hitchance >= HitChance.High)
+								Q.Cast(QGlobalPred.CastPosition);
+						}
+					}
+				}
+				else
+				{
+					QGlobalPred = null;
 				}
 			}
 
-			if (Q.IsReady() && Config.IsChecked(Orbwalker.ActiveModes.Harass, "use.Q"))
-			{
-				var target = TargetSelector.GetTarget(Q.Range, DamageType.Magical);
-				if (target != null && target.IsWithinDistance(Config.GetValue(Orbwalker.ActiveModes.Harass, "modiefied.Q.range.min"), Config.GetValue(Orbwalker.ActiveModes.Harass, "modiefied.Q.range.max")))
-				{
-					var pred = Q.GetProdiction(target);
-					if (pred.Hitchance >= HitChance.High)
-						Q.Cast(pred.CastPosition);
-				}
-			}
 		}
-
 		private static void KillstealCheck()
 		{
 			var combos = GetAllPossibleCombos(new[] { "Q", "E", "R" });

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using EloBuddy;
@@ -78,12 +79,10 @@ namespace CarryMe_Blitzcrank.Basics
 		{
 			BasicCollision
 		}
+
 		public static IEnumerable<Obj_AI_Base> CollisionObjects(Vector3 fromPos, Vector3 to, int width)
 		{
-			return (from obj in ObjectManager.Get<Obj_AI_Base>()
-					let rec = new Geometry.Polygon.Rectangle(fromPos.To2D(), to.To2D(), width + obj.BoundingRadius * 2)
-					where rec.IsInside(obj) && obj != ObjectManager.Player
-					select obj).ToList();
+			return (from obj in ObjectManager.Get<Obj_AI_Base>() let rec = new Geometry.Polygon.Rectangle(fromPos.To2D(), to.To2D(), width + obj.BoundingRadius*2) where rec.IsInside(obj) && obj != ObjectManager.Player select obj).ToList();
 		}
 
 		internal static Vector3 PositionAfterTime(Obj_AI_Base unit, float time, float speed = float.MaxValue)

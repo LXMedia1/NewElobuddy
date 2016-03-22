@@ -18,6 +18,8 @@ namespace CarryMe_Blitzcrank.Basics
 			Drawing,
 			Misc,
 			Killsteal,
+			Anti_FPS_Drop,
+			BlackList,
 		}
 
 		internal Dictionary<string,Menu> MenuDictionary = new Dictionary<string, Menu>();
@@ -35,7 +37,7 @@ namespace CarryMe_Blitzcrank.Basics
 		internal void AddMenu(MenuNames menuname)
 		{
 			var menu = MainMenu.GetMenu("cm_" + ObjectManager.Player.ChampionName.ToLower());
-			var newmenu = menu.AddSubMenu("Mode " + menuname, "cm_" + menuname.ToString().ToLower(), "CarryMe " + ObjectManager.Player.ChampionName + " - " + menuname);
+			var newmenu = menu.AddSubMenu(menuname.ToString().Replace("_"," "), "cm_" + menuname.ToString().ToLower(), "CarryMe " + ObjectManager.Player.ChampionName + " - " + menuname);
 			MenuDictionary.Add(menuname.ToString(), newmenu);
 		}
 
@@ -147,13 +149,29 @@ namespace CarryMe_Blitzcrank.Basics
 
 		internal bool IsChecked(MenuNames menuname, string identifier)
 		{
-			return MenuDictionary[menuname.ToString()][identifier].Cast<CheckBox>().CurrentValue;
+			try
+			{
+				return MenuDictionary[menuname.ToString()][identifier].Cast<CheckBox>().CurrentValue;
+			}
+			catch (Exception)
+			{
+				// checkbox not exist
+				return false;
+			}
 		}
 
 		internal bool IsChecked(Orbwalker.ActiveModes mode, string identifier)
 		{
-			return Orbwalker.ActiveModesFlags.HasFlag(mode) &&
+			try
+			{
+				return Orbwalker.ActiveModesFlags.HasFlag(mode) &&
 				   MenuDictionary[mode.ToString()][identifier].Cast<CheckBox>().CurrentValue;
+			}
+			catch (Exception)
+			{
+				// checkbox not exist
+				return false;
+			}
 		}
 
 		internal int GetValue(MenuNames menuname, string identifier)

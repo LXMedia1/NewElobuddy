@@ -14,6 +14,7 @@ namespace CarryMe_Blitzcrank
 	static class Blitzcrank
 	{
 		internal static MenuBuilder Config;
+		public static int NotifieDelay;
 
 		internal static double QHitCount;
 		internal static double QTotalCastCount;
@@ -26,7 +27,7 @@ namespace CarryMe_Blitzcrank
 		public static Obj_AI_Base QGlobalTarget;
 		public static Prodiction.ProdictResult QGlobalPred;
 
-		public static int NotifieDelay;
+		
 		internal static void Load()
 		{
 			Config = Blitzcrank_Menu.Load();

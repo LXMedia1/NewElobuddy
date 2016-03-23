@@ -41,10 +41,8 @@ namespace CarryMe_Blitzcrank.Basics
 					Hitchance = HitChance,
 					CollisionObjects = null
 				};
-			
-			var ColObjects = CollisionObjects(fromUnit.Position, FixedPredictedPosition.To3D(), spell.Width);
-			if (spell.AllowedCollisionCount == 0)
-				ColObjects = Filter(ColObjects, CollisionMode.BasicCollision, unit);
+
+			var ColObjects = CollisionObjects(fromUnit.Position, FixedPredictedPosition.To3D(), spell.Width, unit);
 			HitChance = ColObjects.Any() ? HitChance.Collision : HitChance;
 
 			return new ProdictResult()
@@ -56,33 +54,16 @@ namespace CarryMe_Blitzcrank.Basics
 			};
 
 		}
-		private static IEnumerable<Obj_AI_Base> Filter(IEnumerable<Obj_AI_Base> ColObjects, CollisionMode collisionMode, Obj_AI_Base unit)
-		{
-			switch (collisionMode)
-			{
-				case CollisionMode.BasicCollision:
-					return ColObjects.Where(u => !u.IsDead && !u.IsAlly && !u.IsStructure() && (u.IsMinion || u.IsMonster) && unit.NetworkId != u.NetworkId);
-			}
-			return ColObjects;
-		}
-		private static IEnumerable<Obj_AI_Base> Filter(IEnumerable<Obj_AI_Base> ColObjects, CollisionMode collisionMode)
-		{
-			switch (collisionMode)
-			{
-					case CollisionMode.BasicCollision:
-					return ColObjects.Where(u => !u.IsDead && !u.IsAlly && !u.IsStructure() && (u.IsMinion || u.IsMonster));
-			} 
-			return ColObjects;
-		}
 
 		public enum CollisionMode
 		{
 			BasicCollision
 		}
 
-		public static IEnumerable<Obj_AI_Base> CollisionObjects(Vector3 fromPos, Vector3 to, int width)
+		public static IEnumerable<Obj_AI_Base> CollisionObjects(Vector3 fromPos, Vector3 to, int width,Obj_AI_Base unit)
 		{
-			return (from obj in ObjectManager.Get<Obj_AI_Base>() let rec = new Geometry.Polygon.Rectangle(fromPos.To2D(), to.To2D(), width + obj.BoundingRadius*2) where rec.IsInside(obj) && obj != ObjectManager.Player select obj).ToList();
+			var Objectlist = ObjectManager.Get<Obj_AI_Base>().Where(u => !u.IsDead && u.IsValidTarget(fromPos.Distance(to) + 10) && (u.IsMinion || u.IsMonster || u.Type == GameObjectType.AIHeroClient) && unit.NetworkId != u.NetworkId);
+			return (from obj in Objectlist let rec = new Geometry.Polygon.Rectangle(fromPos.To2D(), to.To2D(), width + obj.BoundingRadius * 2) where rec.IsInside(obj) && obj != ObjectManager.Player select obj).ToList();
 		}
 
 		internal static Vector3 PositionAfterTime(Obj_AI_Base unit, float time, float speed = float.MaxValue)

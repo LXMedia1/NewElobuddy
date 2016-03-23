@@ -62,7 +62,7 @@ namespace CarryMe_Blitzcrank.Basics
 
 		public static IEnumerable<Obj_AI_Base> CollisionObjects(Vector3 fromPos, Vector3 to, int width,Obj_AI_Base unit)
 		{
-			var Objectlist = ObjectManager.Get<Obj_AI_Base>().Where(u => !u.IsDead && u.IsValidTarget(fromPos.Distance(to) + 10) && (u.IsMinion || u.IsMonster || u.Type == GameObjectType.AIHeroClient) && unit.NetworkId != u.NetworkId);
+			var Objectlist = ObjectManager.Get<Obj_AI_Base>().Where(u => !u.IsAlly && !u.IsDead && u.IsValidTarget(fromPos.Distance(to) + 10) && (u.IsMinion || u.IsMonster || u.Type == GameObjectType.AIHeroClient) && unit.NetworkId != u.NetworkId);
 			return (from obj in Objectlist let rec = new Geometry.Polygon.Rectangle(fromPos.To2D(), to.To2D(), width + obj.BoundingRadius * 2) where rec.IsInside(obj) && obj != ObjectManager.Player select obj).ToList();
 		}
 

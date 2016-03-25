@@ -13,12 +13,18 @@ namespace CarryMe_Collection.Logic
 		{
 			Config = MainMenu.AddMenu("CM-" + Champions.Me.ChampionName, "cm." + Champions.Me.ChampionName, "CarryMe - " + Champions.Me.ChampionName);
 			Config.AddLabel("Wellcome to the CarryMe Series by Lekks/Lexxes");
+			
 			var ChangeLog = new List<string>
 			{
 				"Releasedate: 25.03.2016 20:45",
 				"[0] Test If Install/Upload/Aktual work correctly",
 			};
 			Config.AddSpoiler("1.0.0.1", "Show ChangeLog 1.0.0.1", ChangeLog, true);
+			Config.AddSeparator();
+			if (Config.ShouldReadChangeLog("1.0.0.1"))
+				Chat.Print("Lexxes: There is some New Stuff, pls read the Changelog inside the Menu :P");
+
+
 			 ChangeLog = new List<string>
 			{
 				"Releasedate: 25.03.2016 20:05",
@@ -35,9 +41,6 @@ namespace CarryMe_Collection.Logic
 				"[2] Mundo R on Min-Health-Percent"
 			};
 			Config.AddSpoiler("1.0.0.0", "Show ChangeLog 1.0.0.0", ChangeLog,true);
-
-			if (Config.ShouldReadChangeLog("1.0.0.1"))
-				Chat.Print("Lexxes: There is some New Stuff, pls read the Changelog inside the Menu :P");
 			
 		}
 

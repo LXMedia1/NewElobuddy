@@ -20,7 +20,7 @@ namespace CarryMe_Collection.Logic
 
 		public static Spell.Skillshot Q = new Spell.Skillshot(SpellSlot.Q, 1000, SkillShotType.Linear, 250, 1850, 60);
 		public static Spell.Active W = new Spell.Active(SpellSlot.W, 325);
-		public static Spell.Active E = new Spell.Active(SpellSlot.E, 150);
+		public static Spell.Active E = new Spell.Active(SpellSlot.E,290);
 		public static Spell.Active R = new Spell.Active(SpellSlot.R);
 		internal override void WriteMenuStart()
 		{
@@ -61,7 +61,7 @@ namespace CarryMe_Collection.Logic
 			PassiveMenu.AddCheckBox("use.E.Wards", "Use E to Remove Wards");
 			PassiveMenu.AddCheckBox("use.E.Objects", "Use E on (Tower,Inhib,Base)");
 			PassiveMenu.AddLabel("Additional R Settings ( dont touch if you have no Idea what you are doing )");
-			PassiveMenu.AddSlider("use.R.minHealth", "Use R On {0} % Health",15);
+			PassiveMenu.AddSlider("use.R.minHealth", "Use R On {0} % Health",25);
 			DrawMenu = Config.AddSubMenu(MenuBuilder.MenuName.Drawing);
 			var checkbox = DrawMenu.AddCheckBox("draw.Q.range", "Draw Q Range");
 			new Drawer.DrawRange(Q ,checkbox);
@@ -117,10 +117,6 @@ namespace CarryMe_Collection.Logic
 				PassiveMenu.GetValue("W.disableRangeMinion"),
 				PassiveMenu.GetValue("W.disableRangeMonster"));
 			R.CastOnMinHealth(PassiveMenu.GetValue("use.R.minHealth"));
-			if (HarrasMenu.IsChecked("use.E.Lasthit") && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.Harass))
-				E.ResetAttackForLasthit();
-			if (LaneClearMenu.IsChecked("use.E.Lasthit") && Orbwalker.ActiveModesFlags.HasFlag(Orbwalker.ActiveModes.LaneClear))
-				E.ResetAttackForLasthit();
 		}
 
 		internal override void OnAfterAttack(AttackableUnit target, EventArgs args)

@@ -15,7 +15,13 @@ namespace CarryMe_Collection.Logic
 			Config.AddLabel("Wellcome to the CarryMe Series by Lekks/Lexxes");
 			var ChangeLog = new List<string>
 			{
-				"Release: 25.03.2016 20:05",
+				"Releasedate: 25.03.2016 20:45",
+				"[0] Test If Install/Upload/Aktual work correctly",
+			};
+			Config.AddSpoiler("1.0.0.1", "Show ChangeLog 1.0.0.1", ChangeLog, true);
+			 ChangeLog = new List<string>
+			{
+				"Releasedate: 25.03.2016 20:05",
 				"[0] Beta Released",
 				"[1] New Core Specific Stuff",
 				"[2] Unique LineSpell Prodiction (Not Elobuddy Prediction)",
@@ -30,7 +36,7 @@ namespace CarryMe_Collection.Logic
 			};
 			Config.AddSpoiler("1.0.0.0", "Show ChangeLog 1.0.0.0", ChangeLog,true);
 
-			if (Config.ShouldReadChangeLog("1.0.0.0"))
+			if (Config.ShouldReadChangeLog("1.0.0.1"))
 				Chat.Print("Lexxes: There is some New Stuff, pls read the Changelog inside the Menu :P");
 			
 		}

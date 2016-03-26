@@ -2,6 +2,7 @@
 using CarryMe_Collection.Basics;
 using EloBuddy;
 using EloBuddy.SDK.Menu;
+using Newtonsoft.Json.Serialization;
 
 namespace CarryMe_Collection.Logic
 {
@@ -13,18 +14,22 @@ namespace CarryMe_Collection.Logic
 		{
 			Config = MainMenu.AddMenu("CM-" + Champions.Me.ChampionName, "cm." + Champions.Me.ChampionName, "CarryMe - " + Champions.Me.ChampionName);
 			Config.AddLabel("Wellcome to the CarryMe Series by Lekks/Lexxes");
-			
 			var ChangeLog = new List<string>
+			{
+				"Releasedate: 26.03.2016 01:53",
+				"[0] Drawing Change",
+				"[1] Changed the Drawing Methode from Poligon to Rendering",
+			};
+			Config.AddSpoiler("1.0.0.2", "Show ChangeLog 1.0.0.2", ChangeLog, true);
+			if (Config.ShouldReadChangeLog("1.0.0.2"))
+				Chat.Print("Lexxes: There is some New Stuff, pls read the Changelog inside the Menu :P");
+			 ChangeLog = new List<string>
 			{
 				"Releasedate: 25.03.2016 20:45",
 				"[0] Test If Install/Upload/Aktual work correctly",
 			};
 			Config.AddSpoiler("1.0.0.1", "Show ChangeLog 1.0.0.1", ChangeLog, true);
-			Config.AddSeparator();
-			if (Config.ShouldReadChangeLog("1.0.0.1"))
-				Chat.Print("Lexxes: There is some New Stuff, pls read the Changelog inside the Menu :P");
-
-
+			Config.AddSeparator(1);
 			 ChangeLog = new List<string>
 			{
 				"Releasedate: 25.03.2016 20:05",

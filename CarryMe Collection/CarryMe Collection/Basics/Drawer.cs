@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,15 +50,13 @@ namespace CarryMe_Collection.Basics
 					case DrawType.Skillshot:
 						if (Spell_Skillshot.IsLearned)
 						{
-							var Circle = new Geometry.Polygon.Circle(Champions.Me.Position, Spell_Skillshot.Range, 50);
-							Circle.Draw(Spell_Skillshot.IsReady() ? Color.DarkGreen : Color.DarkRed);
+							EloBuddy.SDK.Rendering.Circle.Draw(Spell_Skillshot.IsReady() ? SharpDX.Color.DarkGreen : SharpDX.Color.DarkRed,Spell_Skillshot.Range,2,ObjectManager.Player);
 						}
 						break;
 					case DrawType.Active:
 						if (Spell_Active.IsLearned)
 						{
-							var Circle = new Geometry.Polygon.Circle(Champions.Me.Position, Spell_Active.Range, 50);
-							Circle.Draw(Spell_Active.IsReady() ? Color.DarkGreen : Color.DarkRed);
+							EloBuddy.SDK.Rendering.Circle.Draw(Spell_Active.IsReady() ? SharpDX.Color.DarkGreen : SharpDX.Color.DarkRed, Spell_Active.Range,2, ObjectManager.Player);
 						}
 						break;
 				}

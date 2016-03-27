@@ -29,6 +29,7 @@ namespace CarryMe_Collection.Basics
 			MonsterStrongest,
 			Wards,
 			Objects,
+			NearstEnemy,
 		}
 
 
@@ -45,6 +46,14 @@ namespace CarryMe_Collection.Basics
 					var pred = spell.GetProdiction(target, null, collision);
 					if (pred.Hitchance >= HitChance.High && pred.isValid)
 						spell.Cast(pred.CastPosition);
+					break;
+				case TargetType.NearstEnemy:
+					var NearTarget = EntityManager.Heroes.Enemies.Where(u=> !u.IsDead && u.IsValidTarget(spell.Range)).OrderBy(u=> u.Distance(Champions.Me)).FirstOrDefault();
+					if (NearTarget == null)
+						return;
+					var NearTargetpred = spell.GetProdiction(NearTarget, null, collision);
+					if (NearTargetpred.Hitchance >= HitChance.High && NearTargetpred.isValid)
+						spell.Cast(NearTargetpred.CastPosition);
 					break;
 				case TargetType.MinionLasthit:
 					var PossibleTargets = EntityManager.MinionsAndMonsters.EnemyMinions.Where(

@@ -21,6 +21,8 @@ namespace CarryMe_Collection.Basics
 			Passive,
 			JungleClear,
 			Drawing,
+			LastHit,
+			Flee,
 		}
 
 		public static bool IsChecked(this Menu menu, string Identifier)

@@ -14,7 +14,9 @@ namespace CarryMe_Collection.Logic
 		public Menu ComboMenu;
 		public Menu HarrasMenu;
 		public Menu LaneClearMenu;
+		public Menu LasthitMenu;
 		public Menu JungleClearMenu;
+		public Menu FleeMenu;
 		public Menu PassiveMenu;
 		public Menu DrawMenu;
 
@@ -38,6 +40,9 @@ namespace CarryMe_Collection.Logic
 			HarrasMenu.AddCheckBox("use.E.forAAReset", "Use E For AA-Reset On Enemy");
 			HarrasMenu.AddCheckBox("use.E.Lasthit", "Use E to Safe Lasthit");
 
+			LasthitMenu = Config.AddSubMenu(MenuBuilder.MenuName.LastHit);
+			LasthitMenu.AddCheckBox("use.Q.Lasthit", "Use Q for Lasthit Minion");
+
 			LaneClearMenu = Config.AddSubMenu(MenuBuilder.MenuName.LaneClear);
 			LaneClearMenu.AddCheckBox("use.Q.Lasthit", "Use Q for Lasthit Minion");
 			LaneClearMenu.AddCheckBox("use.Q.strongest", "Use Q on Strongest Minion");
@@ -51,6 +56,9 @@ namespace CarryMe_Collection.Logic
 			JungleClearMenu.AddCheckBox("use.W", "Use W if Monster near");
 			JungleClearMenu.AddCheckBox("use.E.Lasthit", "Use E on Minion Lasthit");
 			JungleClearMenu.AddCheckBox("use.E.Any", "Use E on Any Minion");
+
+			FleeMenu = Config.AddSubMenu(MenuBuilder.MenuName.Flee);
+			FleeMenu.AddCheckBox("use.Q.nearst", "Use Q On Nearst Enemy");
 
 			PassiveMenu = Config.AddSubMenu(MenuBuilder.MenuName.Passive);
 			PassiveMenu.AddLabel("Additional W Settings ( dont touch if you have no Idea what you are doing )");
@@ -91,6 +99,12 @@ namespace CarryMe_Collection.Logic
 				W.ActivateAuraLogic(CastLogics.TargetType.AnyEnemy);
 		}
 
+		internal override void OnLastHit()
+		{
+			if (LasthitMenu.IsChecked("use.Q.Lasthit"))
+				Q.CastLogicLinearBasic(CastLogics.CollisionType.Basic, CastLogics.TargetType.MinionLasthit, DamageType.Magical);
+		}
+
 		internal override void OnLaneClear()
 		{
 			if (LaneClearMenu.IsChecked("use.Q.Lasthit"))
@@ -109,6 +123,12 @@ namespace CarryMe_Collection.Logic
 				Q.CastLogicLinearBasic(CastLogics.CollisionType.Basic, CastLogics.TargetType.MonsterStrongest, DamageType.Magical);
 			if (JungleClearMenu.IsChecked("use.W"))
 				W.ActivateAuraLogic(CastLogics.TargetType.AnyMonster);
+		}
+
+		internal override void OnFlee()
+		{
+			if (FleeMenu.IsChecked("use.Q.nearst"))
+				Q.CastLogicLinearBasic(CastLogics.CollisionType.Basic, CastLogics.TargetType.NearstEnemy, DamageType.Magical);
 		}
 
 		internal override void OnPassive()

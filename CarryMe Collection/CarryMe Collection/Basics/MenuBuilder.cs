@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EloBuddy;
+using EloBuddy.SDK;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 
@@ -24,7 +25,12 @@ namespace CarryMe_Collection.Basics
 			LastHit,
 			Flee,
 		}
-
+		public enum Champlist
+		{
+			Buddy,
+			BuddyWithoutMe,
+			Enemy
+		}
 		public static bool IsChecked(this Menu menu, string Identifier)
 		{
 			try
@@ -45,7 +51,7 @@ namespace CarryMe_Collection.Basics
 			}
 			catch (Exception)
 			{
-				Console.WriteLine("CM-Error: AddCheckbox with Identifier: " + Identifier + " allready exist.");
+				Console.WriteLine("CM-Error: AddCheckbox with Identifier: " + Identifier + " allready exist. ");
 				return new CheckBox("dummy");
 			}
 		}
@@ -73,7 +79,38 @@ namespace CarryMe_Collection.Basics
 				return new Slider("dummy");
 			}
 		}
-
+		public static bool IsActiveOnHeroList(this Menu Menu, string Identifier, AIHeroClient hero)
+		{
+			try
+			{
+				return Menu[Identifier + "." + hero.ChampionName].Cast<CheckBox>().CurrentValue;
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+		}
+		public static void AddHeroList(this Menu Menu, string Identifier, string DisplayName, Champlist champlist)
+		{
+			switch (champlist)
+			{
+				case Champlist.BuddyWithoutMe:
+					foreach (var buddy in EntityManager.Heroes.Allies.Where(u => !u.IsMe))
+					{
+						Menu.AddCheckBox(Identifier + "." + buddy.ChampionName, DisplayName + " " + buddy.ChampionName);
+					} break;
+				case Champlist.Buddy:
+					foreach (var buddy in EntityManager.Heroes.Allies)
+					{
+						Menu.AddCheckBox(Identifier + "." + buddy.ChampionName, DisplayName + " " + buddy.ChampionName);
+					} break;
+				case Champlist.Enemy:
+					foreach (var buddy in EntityManager.Heroes.Enemies)
+					{
+						Menu.AddCheckBox(Identifier + "." + buddy.ChampionName, DisplayName + " " + buddy.ChampionName);
+					} break;
+			}
+		}
 		public static Menu AddSubMenu(this Menu Menu, MenuName name)
 		{
 			try

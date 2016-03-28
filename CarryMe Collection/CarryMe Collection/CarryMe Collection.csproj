@@ -90,6 +90,8 @@
     <Compile Include="Basics\Misc.cs" />
     <Compile Include="Champions.cs" />
     <Compile Include="DamageLibary.cs" />
+    <Compile Include="Logic\Shen.cs" />
+    <Compile Include="Logic\CarryWalker.cs" />
     <Compile Include="Logic\Ahri.cs" />
     <Compile Include="Logic\Braum.cs" />
     <Compile Include="Logic\Brand.cs" />

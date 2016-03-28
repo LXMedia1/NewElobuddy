@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CarryMe_Activator.Classes;
 using CarryMe_Activator.DB;
 using EloBuddy;
 using EloBuddy.SDK;
@@ -20,7 +20,6 @@ namespace CarryMe_Activator
 		public static SpellSlot SmiteSlot;
 		public static SpellSlot FlashSlot;
 
-		public static List<Hero> VirtualHeroList = new List<Hero>();
 		public static List<Spell> SpellsIngameList = new List<Spell>();
 		public static List<Buff> BuffsIngameList = new List<Buff>();
 		public static List<Troy> TroysIngameList = new List<Troy>();
@@ -35,7 +34,6 @@ namespace CarryMe_Activator
 
 			foreach (var hero in EntityManager.Heroes.AllHeroes)
 			{
-				VirtualHeroList.Add(new Hero(hero));
 				if (!hero.IsEnemy)
 					continue;
 				var enemy = hero;
@@ -58,7 +56,23 @@ namespace CarryMe_Activator
 			CleanserItems.Load();
 			OffensiveItems.Load();
 			SituationalItems.Load();
+
+			//not finished Yet
+			//FireManager.Load();
+			//FireManager.OnSpellCast += OnSpellCast;
+			//Drawing.OnDraw += OnDraw;
+		}
+
+		private static void OnSpellCast(Spell spell, List<AIHeroClient> target)
+		{
 			
 		}
+
+		private static void OnDraw(EventArgs args)
+		{
+			
+		}
+
+
 	}
 }

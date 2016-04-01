@@ -413,13 +413,13 @@ namespace CarryMe_Collection.Basics
 																	   (u.IsMinion || u.IsMonster ||
 																		u.Type == GameObjectType.AIHeroClient) &&
 																		((unit == null) || u.NetworkId != unit.NetworkId) &&
-																	   (width + u.BoundingRadius / 2 - u.Position.To2D().Distance(from.To2D(), to.To2D(), false, false) > 0)).OrderBy(u => u.Distance(Champions.Me));
+																	   (width + u.BoundingRadius - u.Position.To2D().Distance(from.To2D(), to.To2D(), false, false) > 0)).OrderBy(u => u.Distance(Champions.Me));
 				case CollisionType.EnemyHeros:
 					return EntityManager.Heroes.Enemies.Where(u => !u.IsDead && !u.IsAlly && !u.IsMe &&
 																	   u.IsValidTarget(from.Distance(to) + 10) &&
 																	   u.Type == GameObjectType.AIHeroClient &&
 																	   ((unit == null) || u.NetworkId != unit.NetworkId) &&
-																	   (width + u.BoundingRadius / 2 - u.Position.To2D().Distance(from.To2D(), to.To2D(), false, false) > 0)).OrderBy(u => u.Distance(Champions.Me));
+																	   (width + u.BoundingRadius - u.Position.To2D().Distance(from.To2D(), to.To2D(), false, false) > 0)).OrderBy(u => u.Distance(Champions.Me));
 			}
 			return ObjectManager.Get<Obj_AI_Base>().Where(u => false).ToList();
 		}

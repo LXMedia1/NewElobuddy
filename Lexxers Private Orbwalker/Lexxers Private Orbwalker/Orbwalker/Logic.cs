@@ -137,6 +137,16 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear || 
 				mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass)
 			{
+				var Monsters = EntityManager.MinionsAndMonsters.Monsters
+					.Where(m => m.isValidAATarget())
+					.OrderBy(m => m.Health)
+					.ThenByDescending(m => m.MaxHealth);
+				foreach (var Monster in Monsters)
+				{
+					var healthPred = Prediction.Health.GetPrediction(Monster, MissileHitTime(Monster));
+					if (healthPred <= Me.GetAutoAttackDamageOverride(Monster, true))
+						return Monster;
+				}
 				bestTarget = EntityManager.MinionsAndMonsters.Monsters
 				   .Where(m => m.isValidAATarget()).OrderByDescending(m => m.MaxHealth).FirstOrDefault();
 				if (bestTarget != null)

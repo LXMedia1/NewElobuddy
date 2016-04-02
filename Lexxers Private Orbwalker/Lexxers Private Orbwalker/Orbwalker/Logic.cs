@@ -45,6 +45,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 			var mode = GetCurrentMode();
 
+			if (Me.IsDead && !Me.IsZombie)
+				return;
 			Attack(mode);
 			Move(mode);
 		}
@@ -90,25 +92,65 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 		private static AttackableUnit GetTarget(EloBuddy.SDK.Orbwalker.ActiveModes mode)
 		{
-			switch (mode)
+			// Always Attack 1 shot Killable Enemy if in Range
+			var bestTarget = GetKillableAutoAttackTarget();
+			if (bestTarget != null)
+				return bestTarget;
+
+			// Attack Enemy if not Farm Prioritie
+			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass && !FarmPrioritie)
 			{
-				case EloBuddy.SDK.Orbwalker.ActiveModes.Combo:
-					return ObjectManager.Get<AIHeroClient>().Where(u => u.isValidAATarget()).OrderBy(u => !u.IsZombie).ThenBy(u => u.Health).FirstOrDefault();
+				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
+				if (bestTarget != null)
+					return bestTarget;
+			}
+
+			// lasthit Minion basic
+			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass || 
+				mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear ||
+			    mode == EloBuddy.SDK.Orbwalker.ActiveModes.LastHit)
+			{
+				var Minions = EntityManager.MinionsAndMonsters.Minions
+					.Where(m => m.isValidAATarget())
+					.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
+					.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
+					.ThenBy(m => m.Health)
+					.ThenByDescending(m => m.MaxHealth);
+				foreach (var Minion in Minions)
+				{
+					var healthPred = Prediction.Health.GetPrediction(Minion, MissileHitTime(Minion));
+					if (healthPred <= Me.GetAutoAttackDamageOverride(Minion, true))
+					{
+						return Minion;
+					}
+				}
 			}
 			return null;
+		}
+
+		private static AttackableUnit GetKillableAutoAttackTarget()
+		{
+			return GetPossibleTargets().FirstOrDefault(u=> u.Health <= Me.GetAutoAttackDamageOverride(u,true));
+		}
+
+		private static IEnumerable<AIHeroClient> GetPossibleTargets()
+		{
+			return ObjectManager.Get<AIHeroClient>().Where(u => u.isValidAATarget());
 		}
 
 		private static bool isValidAATarget(this Obj_AI_Base unit)
 		{
 			if (unit.IsDead || unit.IsAlly)
 				return false;
-			if (unit.HasBuff("JudicatorIntervention") && unit.GetBuff("JudicatorIntervention").EndTime < Game.Time + MissleHitTime(unit)) // Kayle R Buff
+			if (unit.HasBuff("JudicatorIntervention") && unit.GetBuff("JudicatorIntervention").EndTime < Game.Time + MissileHitTime(unit)) // Kayle R Buff
 				return false;
-			if (unit.HasBuff("Chronoshift") && unit.GetBuff("Chronoshift").EndTime < Game.Time + MissleHitTime(unit)) // Zilean R Buff
+			if (unit.HasBuff("Chronoshift") && unit.GetBuff("Chronoshift").EndTime < Game.Time + MissileHitTime(unit)) // Zilean R Buff
 				return false;
-			if (unit.HasBuff("FioraW") && unit.GetBuff("FioraW").EndTime < Game.Time + MissleHitTime(unit)) // Fiora W AttackReflect
+			if (unit.HasBuff("FioraW") && unit.GetBuff("FioraW").EndTime < Game.Time + MissileHitTime(unit)) // Fiora W AttackReflect
 				return false;
 			if (Me.HasBuffOfType(BuffType.Blind) && Me.Hero == Champion.Caitlyn && !Me.HasBuff("caitlynheadshot")) // not shot while blind and Headshot is ready
+				return false;
+			if (unit.Name == "WardCorpse" || unit.CharData.BaseSkinName == "jarvanivstandard")
 				return false;
 			var attackrange = Me.AttackRange + Me.BoundingRadius + unit.BoundingRadius;
 			if (Me.Hero == Champion.Caitlyn && unit.HasBuff("caitlynyordletrapinternal"))
@@ -118,7 +160,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			return true;
 		}
 
-		private static int MissleHitTime(this Obj_AI_Base unit)
+		private static int MissileHitTime(this Obj_AI_Base unit)
 		{
 			var attackspeed = Me.BasicAttack.MissileSpeed;
 			if (Me.IsMelee ||
@@ -175,6 +217,11 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit))
 				return EloBuddy.SDK.Orbwalker.ActiveModes.LastHit;
 			return EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Flee) ? EloBuddy.SDK.Orbwalker.ActiveModes.Flee : EloBuddy.SDK.Orbwalker.ActiveModes.None;
+		}
+
+		public static bool FarmPrioritie
+		{
+			get { return Menu.Config_Behavier["priorityFarm"].Cast<CheckBox>().CurrentValue; }
 		}
 
 		public static float WindUp

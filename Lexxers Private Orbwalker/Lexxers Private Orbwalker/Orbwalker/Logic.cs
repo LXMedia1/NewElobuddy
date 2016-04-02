@@ -23,6 +23,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 		private static int _moveDelay;
 		private static int _attackDelay;
+		private static int _farmDelay;
 		private static int _RandomDelay = 300;
 		private static int _RandomDelayTick;
 		private static bool _MissleStarted;
@@ -120,12 +121,40 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				{
 					var healthPred = Prediction.Health.GetPrediction(Minion, MissileHitTime(Minion));
 					if (healthPred <= Me.GetAutoAttackDamageOverride(Minion, true))
-					{
 						return Minion;
-					}
 				}
 			}
+
+			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass || 
+				mode == EloBuddy.SDK.Orbwalker.ActiveModes.Combo || 
+				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear && !WaitForMinion()))
+			{
+				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
+				if (bestTarget != null)
+					return bestTarget;
+			}
+
+			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear || 
+				mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass)
+			{
+				bestTarget = EntityManager.MinionsAndMonsters.Monsters
+				   .Where(m => m.isValidAATarget()).OrderByDescending(m => m.MaxHealth).FirstOrDefault();
+				if (bestTarget != null)
+					return bestTarget;
+			}
+
 			return null;
+		}
+
+		private static bool WaitForMinion()
+		{
+			return EntityManager.MinionsAndMonsters.Minions.Any(m => m.isValidAATarget() &&
+			                                                         Prediction.Health.GetPrediction(m,
+				                                                         (int) (Me.AttackDelay*1000*2 + GetRandomFarmDelay)) <=
+			                                                         Me.GetAutoAttackDamageOverride(m, false)*2 &&
+			                                                         Prediction.Health.GetPrediction(m,
+				                                                         (int) (Me.AttackDelay*1000*2 + GetRandomFarmDelay)) <
+			                                                         m.Health);
 		}
 
 		private static AttackableUnit GetKillableAutoAttackTarget()
@@ -201,6 +230,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				_RandomDelayTick = Core.GameTickCount;
 				_moveDelay = new Random().Next(80, 130);
 				_attackDelay = new Random().Next(80, 130);
+				_farmDelay = new Random().Next(20, 130);
 			}
 		}
 
@@ -223,10 +253,15 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		{
 			get { return Menu.Config_Behavier["priorityFarm"].Cast<CheckBox>().CurrentValue; }
 		}
-
+		
 		public static float WindUp
 		{
 			get { return Menu.Config_Extra["windup"].Cast<Slider>().CurrentValue; }
+		}
+
+		public static int GetRandomFarmDelay
+		{
+			get { return _farmDelay; }
 		}
 
 		public static int GetRandomMoveDelay

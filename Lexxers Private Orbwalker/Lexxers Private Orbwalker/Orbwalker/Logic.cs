@@ -125,15 +125,17 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				}
 			}
 
+			//basic Harras enemyattack if no lasthit
 			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Combo ||
-				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass && !WaitForMinion()) ||
-				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear && !WaitForMinion()))
+				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass) ||
+				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
 			{
 				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
 				if (bestTarget != null)
 					return bestTarget;
 			}
 
+			//Jungleminions
 			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear || 
 				mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass)
 			{
@@ -152,6 +154,29 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				if (bestTarget != null)
 					return bestTarget;
 			}
+
+			return null;
+			//underTower
+			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear ||
+			    mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass ||
+			    mode == EloBuddy.SDK.Orbwalker.ActiveModes.LastHit)
+			{
+				var Tower = ObjectManager.Get<Obj_AI_Turret>().Where(t => !t.IsDead && t.IsAlly && Me.Distance(t) <= 1800).OrderBy(t => t.Distance(Me)).FirstOrDefault();
+				if (Tower != null)
+				{
+					var UnderTowerMinions = EntityManager.MinionsAndMonsters.Minions
+						.Where(m => m.isValidAATarget() && m.Distance(Tower) <= 900)
+						.OrderByDescending(minion => minion.CharData.BaseSkinName.Contains("Siege"))						
+						.ThenBy(minion => minion.CharData.BaseSkinName.Contains("Super"))
+						.ThenByDescending(minion => minion.MaxHealth)
+						.ThenByDescending(minion => minion.Health);
+					if (UnderTowerMinions.Any())
+					{
+						var AggroMinion = UnderTowerMinions.FirstOrDefault(m => true);
+					}
+				}
+			}
+
 
 			return null;
 		}

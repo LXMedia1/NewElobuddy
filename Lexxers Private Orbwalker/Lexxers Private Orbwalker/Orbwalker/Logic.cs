@@ -125,8 +125,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				}
 			}
 
-			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass || 
-				mode == EloBuddy.SDK.Orbwalker.ActiveModes.Combo || 
+			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Combo ||
+				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass && !WaitForMinion()) ||
 				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear && !WaitForMinion()))
 			{
 				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());

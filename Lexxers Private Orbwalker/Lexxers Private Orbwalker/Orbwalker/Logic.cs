@@ -136,10 +136,33 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			if (target == null)
 				target = GetNearEnemyTower();
 
+			if (target == null)
+				target = GetNearEnemyObjects();
+
+			if (target == null)
+				target = GetNearEnemyWard();
+
 			if (target == null && !WaitForMinion())
 				target = GetLaneClearMinion();
 
 			target.ExecuteAttack();	
+		}
+
+		private static AttackableUnit GetNearEnemyWard()
+		{
+			return !RemoveWards ? null : ObjectManager.Get<Obj_Ward>().First(w => w.isValidAATarget());
+		}
+
+		private static AttackableUnit GetNearEnemyObjects()
+		{
+			if (!RemoveObjects)
+				return null;
+			return ObjectManager.Get<Obj_AI_Base>().First(o => o.isValidAATarget() &&
+				(o.BaseSkinName == "HeimerTblue" ||
+				o.BaseSkinName == "HeimerTYellow" ||
+				o.BaseSkinName == "Tibbers" ||
+				o.BaseSkinName == "VoidGate" ||
+				o.BaseSkinName == "ShacoBox" ));
 		}
 
 		private static AttackableUnit GetNearEnemyTower()
@@ -311,6 +334,16 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			if (list.Count <= 0)
 				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.None);
 			return list;
+		}
+
+		public static bool RemoveObjects
+		{
+			get { return Menu.Config_Behavier["removeObjects"].Cast<CheckBox>().CurrentValue; }
+		}
+
+		public static bool RemoveWards
+		{
+			get { return Menu.Config_Behavier["removeWards"].Cast<CheckBox>().CurrentValue; }
 		}
 
 		public static bool FarmPrioritie

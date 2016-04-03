@@ -150,14 +150,18 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 		private static AttackableUnit GetNearEnemyWard()
 		{
-			return !RemoveWards ? null : ObjectManager.Get<Obj_Ward>().First(w => w.isValidAATarget());
+			if (!RemoveWards)
+				return null;
+			return ObjectManager.Get<Obj_AI_Base>().FirstOrDefault(w => w.isValidAATarget() &&
+				(w.BaseSkinName == "VisionWard" ||
+				w.BaseSkinName == "SightWard"));
 		}
 
 		private static AttackableUnit GetNearEnemyObjects()
 		{
 			if (!RemoveObjects)
 				return null;
-			return ObjectManager.Get<Obj_AI_Base>().First(o => o.isValidAATarget() &&
+			return ObjectManager.Get<Obj_AI_Base>().FirstOrDefault(o => o.isValidAATarget() &&
 				(o.BaseSkinName == "HeimerTblue" ||
 				o.BaseSkinName == "HeimerTYellow" ||
 				o.BaseSkinName == "Tibbers" ||

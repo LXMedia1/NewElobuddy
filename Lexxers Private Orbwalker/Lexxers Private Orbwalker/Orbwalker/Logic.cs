@@ -52,9 +52,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Move(mode);
 		}
 
-		private static void Attack(EloBuddy.SDK.Orbwalker.ActiveModes mode)
+		private static void Attack(List<EloBuddy.SDK.Orbwalker.ActiveModes> mode)
 		{
-			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.None)
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.None))
 				return;
 			if (LastAutoAttackTick + GetRandomAttackDelay > Core.GameTickCount)
 				return;
@@ -69,9 +69,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}		
 		}
 
-		private static void Move(EloBuddy.SDK.Orbwalker.ActiveModes mode)
+		private static void Move(List<EloBuddy.SDK.Orbwalker.ActiveModes> mode)
 		{
-			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.None)
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.None))
 				return;
 			var extraWindUp = 0;
 			// todo SpecialBuffs.
@@ -91,7 +91,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 		}
 
-		private static AttackableUnit GetTarget(EloBuddy.SDK.Orbwalker.ActiveModes mode)
+		private static AttackableUnit GetTarget(List<EloBuddy.SDK.Orbwalker.ActiveModes> mode)
 		{
 			// Always Attack 1 shot Killable Enemy if in Range
 			var bestTarget = GetKillableAutoAttackTarget();
@@ -99,7 +99,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				return bestTarget;
 
 			// Attack Enemy if not Farm Prioritie
-			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass && !FarmPrioritie)
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) && !FarmPrioritie)
 			{
 				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
 				if (bestTarget != null)
@@ -107,9 +107,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 
 			// lasthit Minion basic
-			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass || 
-				mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear ||
-			    mode == EloBuddy.SDK.Orbwalker.ActiveModes.LastHit)
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) ||
+				mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear) ||
+			   mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit))
 			{
 				var Minions = EntityManager.MinionsAndMonsters.Minions
 					.Where(m => m.isValidAATarget())
@@ -126,9 +126,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 
 			//basic Harras enemyattack if no lasthit
-			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Combo ||
-				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass && !WaitForMinion()) ||
-				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear && !WaitForMinion()))
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Combo) ||
+				(mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) && !WaitForMinion()) ||
+				(mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear) && !WaitForMinion()))
 			{
 				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
 				if (bestTarget != null)
@@ -136,8 +136,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 
 			//Jungleminions
-			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear || 
-				mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass)
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear) ||
+				mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass))
 			{
 				var Monsters = EntityManager.MinionsAndMonsters.Monsters
 					.Where(m => m.isValidAATarget())
@@ -156,8 +156,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 
 			// laneclear basic
-			if ((mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass ||
-				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear)) && !WaitForMinion())
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear) && !WaitForMinion())
 			{
 				bestTarget = EntityManager.MinionsAndMonsters.Minions
 				.Where(m => m.isValidAATarget())
@@ -171,9 +170,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 			return null;
 			//underTower
-			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear ||
-			    mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass ||
-			    mode == EloBuddy.SDK.Orbwalker.ActiveModes.LastHit)
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit) ||
+				mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) ||
+				mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
 			{
 				var Tower = ObjectManager.Get<Obj_AI_Turret>().Where(t => !t.IsDead && t.IsAlly && Me.Distance(t) <= 1800).OrderBy(t => t.Distance(Me)).FirstOrDefault();
 				if (Tower != null)
@@ -200,10 +199,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			return EntityManager.MinionsAndMonsters.Minions.Any(m => m.isValidAATarget() &&
 			                                                         Prediction.Health.GetPrediction(m,
 				                                                         (int) (Me.AttackDelay*1000*2 + GetRandomFarmDelay)) <=
-			                                                         Me.GetAutoAttackDamageOverride(m, false)*2 &&
-			                                                         Prediction.Health.GetPrediction(m,
-				                                                         (int) (Me.AttackDelay*1000*2 + GetRandomFarmDelay)) >
-			                                                         m.Health);
+			                                                         Me.GetAutoAttackDamageOverride(m, false) + 200 );
 		}
 
 		private static AttackableUnit GetKillableAutoAttackTarget()
@@ -283,19 +279,24 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 		}
 
-		private static EloBuddy.SDK.Orbwalker.ActiveModes GetCurrentMode()
+		private static List<EloBuddy.SDK.Orbwalker.ActiveModes> GetCurrentMode()
 		{
+			var list = new List<EloBuddy.SDK.Orbwalker.ActiveModes>();
 			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Combo))
-				return EloBuddy.SDK.Orbwalker.ActiveModes.Combo;
+				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.Combo);
 			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Harass))
-				return EloBuddy.SDK.Orbwalker.ActiveModes.Harass;
-			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear))
-				return EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear;
+				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.Harass);
 			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
-				return EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear;
+				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear);
+			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear))
+				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear);
 			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit))
-				return EloBuddy.SDK.Orbwalker.ActiveModes.LastHit;
-			return EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Flee) ? EloBuddy.SDK.Orbwalker.ActiveModes.Flee : EloBuddy.SDK.Orbwalker.ActiveModes.None;
+				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit);
+			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Flee))
+				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.Flee);
+			if (list.Count <= 0)
+				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.None);
+			return list;
 		}
 
 		public static bool FarmPrioritie

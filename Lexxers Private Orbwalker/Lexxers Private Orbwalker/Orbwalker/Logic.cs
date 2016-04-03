@@ -127,8 +127,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 			//basic Harras enemyattack if no lasthit
 			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.Combo ||
-				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass) ||
-				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
+				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass && !WaitForMinion()) ||
+				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear && !WaitForMinion()))
 			{
 				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
 				if (bestTarget != null)
@@ -154,7 +154,19 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				if (bestTarget != null)
 					return bestTarget;
 			}
-
+			if ((mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass ||
+				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear)) && !WaitForMinion())
+			{
+				bestTarget = EntityManager.MinionsAndMonsters.Minions
+				.Where(m => m.isValidAATarget())
+				.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
+				.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
+				.ThenByDescending(m => m.Health)
+				.ThenByDescending(m => m.MaxHealth)
+				.FirstOrDefault();
+				if (bestTarget != null)
+					return bestTarget;
+			}
 			return null;
 			//underTower
 			if (mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear ||

@@ -169,7 +169,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 						.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
 						.ThenBy(m => m.Health)
 						.ThenByDescending(m => m.MaxHealth);
-			return (from Minion in Minions let healthPred = Prediction.Health.GetPrediction(Minion, (int)(Me.AttackDelay * 2 + MissileHitTime(Minion) * 2)) where (healthPred >= Me.GetAutoAttackDamageOverride(Minion, false) * 2 ) select Minion).FirstOrDefault();
+			return (from Minion in Minions let healthPred = Prediction.Health.GetPrediction(Minion, (int)(Me.AttackDelay * 2 + MissileHitTime(Minion) * 2)) where (healthPred >= Me.GetAutoAttackDamageOverride(Minion, false) * 1) select Minion).FirstOrDefault();
 		}
 
 		private static AttackableUnit GetJungleClearMonster()

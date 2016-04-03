@@ -128,10 +128,27 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
 				return;
-			if (WaitForMinion())
-				return;
-				var PrioFarmTarget = (GetKillableAutoAttackTarget() ?? GetLasthitMinion()) ?? GetLaneClearMinion();
-				PrioFarmTarget.ExecuteAttack();	
+			var target = GetKillableAutoAttackTarget();
+
+			if (target == null)
+				target = GetLasthitMinion();
+
+			if (target == null)
+				target = GetNearEnemyTower();
+
+			if (target == null && !WaitForMinion())
+				target = GetLaneClearMinion();
+
+			target.ExecuteAttack();	
+		}
+
+		private static AttackableUnit GetNearEnemyTower()
+		{
+			var Tower = EntityManager.MinionsAndMonsters.Minions
+						.Where(t => t.isValidAATarget())
+						.OrderBy(t=> t.Distance(Me))
+						.FirstOrDefault();
+			return Tower;
 		}
 
 		private static AttackableUnit GetEnemyTarget()
@@ -239,7 +256,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				Me.Hero == Champion.Velkoz ||
 				(Me.Hero == Champion.Viktor && Player.HasBuff("ViktorPowerTransferReturn")))
 				attackspeed = float.MaxValue;
-			return (int)(Me.AttackCastDelay * 1000) - 100 + Game.Ping / 2 +
+			return (int)(Me.AttackCastDelay * 1000)  + Game.Ping / 2 +
 				   1000 * (int)Math.Max(0, Me.Distance(unit) - unit.BoundingRadius) / (int)attackspeed;
 		}
 

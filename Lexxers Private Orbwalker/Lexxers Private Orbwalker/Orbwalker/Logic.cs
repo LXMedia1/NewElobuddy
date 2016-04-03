@@ -162,7 +162,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				.Where(m => m.isValidAATarget())
 				.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
 				.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
-				.ThenByDescending(m => m.Health)
+				.ThenBy(m => m.Health)
 				.ThenByDescending(m => m.MaxHealth)
 				.FirstOrDefault();
 				if (bestTarget != null)
@@ -197,9 +197,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		private static bool WaitForMinion()
 		{
 			return EntityManager.MinionsAndMonsters.Minions.Any(m => m.isValidAATarget() &&
-			                                                         Prediction.Health.GetPrediction(m,
-				                                                         (int) (Me.AttackDelay*1000*2 + GetRandomFarmDelay)) <=
-			                                                         Me.GetAutoAttackDamageOverride(m, false) + 200 );
+																	 Prediction.Health.GetPrediction(m,
+																		 (int)(Me.AttackDelay * 1000 * 2)) <=
+																	 Me.GetAutoAttackDamageOverride(m, true));
 		}
 
 		private static AttackableUnit GetKillableAutoAttackTarget()
@@ -275,7 +275,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				_RandomDelayTick = Core.GameTickCount;
 				_moveDelay = new Random().Next(80, 130);
 				_attackDelay = new Random().Next(80, 130);
-				_farmDelay = new Random().Next(20, 130);
+				_farmDelay = new Random().Next(0, 50);
 			}
 		}
 

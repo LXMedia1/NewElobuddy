@@ -62,10 +62,10 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				(Me.Hero == Champion.Jhin && !Me.HasBuff("JhinPassiveReload")) ||
 				Core.GameTickCount + Game.Ping / 2 + 25 >= LastAutoAttackTick + Me.AttackDelay * 1000)
 			{
-				var target = GetTarget(mode);
-				if (target != null)
-					Player.IssueOrder(GameObjectOrder.AttackUnit, target);
-
+				ComboModeAttack();
+				LastHitModeAttack();
+				HarrasModeAttack();
+				LaneClearModeAttack();
 			}		
 		}
 
@@ -90,112 +90,109 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				Player.IssueOrder(GameObjectOrder.MoveTo, goalPosition);
 			}
 		}
-
-		private static AttackableUnit GetTarget(List<EloBuddy.SDK.Orbwalker.ActiveModes> mode)
+		private static void ComboModeAttack()
 		{
-			// Always Attack 1 shot Killable Enemy if in Range
-			var bestTarget = GetKillableAutoAttackTarget();
-			if (bestTarget != null)
-				return bestTarget;
-
-			// Attack Enemy if not Farm Prioritie
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) && !FarmPrioritie)
-			{
-				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
-				if (bestTarget != null)
-					return bestTarget;
-			}
-
-			// lasthit Minion basic
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) ||
-				mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear) ||
-			   mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit))
-			{
-				var Minions = EntityManager.MinionsAndMonsters.Minions
-					.Where(m => m.isValidAATarget())
-					.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
-					.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
-					.ThenBy(m => m.Health)
-					.ThenByDescending(m => m.MaxHealth);
-				foreach (var Minion in Minions)
-				{
-					var healthPred = Prediction.Health.GetPrediction(Minion, MissileHitTime(Minion));
-					if (healthPred <= Me.GetAutoAttackDamageOverride(Minion, true))
-						return Minion;
-				}
-			}
-
-			//basic Harras enemyattack if no lasthit
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Combo) ||
-				(mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) && !WaitForMinion()) ||
-				(mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear) && !WaitForMinion()))
-			{
-				bestTarget = TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
-				if (bestTarget != null)
-					return bestTarget;
-			}
-
-			//Jungleminions
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear) ||
-				mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass))
-			{
-				var Monsters = EntityManager.MinionsAndMonsters.Monsters
-					.Where(m => m.isValidAATarget())
-					.OrderBy(m => m.Health)
-					.ThenByDescending(m => m.MaxHealth);
-				foreach (var Monster in Monsters)
-				{
-					var healthPred = Prediction.Health.GetPrediction(Monster, MissileHitTime(Monster));
-					if (healthPred <= Me.GetAutoAttackDamageOverride(Monster, true))
-						return Monster;
-				}
-				bestTarget = EntityManager.MinionsAndMonsters.Monsters
-				   .Where(m => m.isValidAATarget()).OrderByDescending(m => m.MaxHealth).FirstOrDefault();
-				if (bestTarget != null)
-					return bestTarget;
-			}
-
-			// laneclear basic
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear) && !WaitForMinion())
-			{
-				bestTarget = EntityManager.MinionsAndMonsters.Minions
-				.Where(m => m.isValidAATarget())
-				.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
-				.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
-				.ThenBy(m => m.Health)
-				.ThenByDescending(m => m.MaxHealth)
-				.FirstOrDefault();
-				if (bestTarget != null)
-					return bestTarget;
-			}
-			return null;
-			//underTower
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit) ||
-				mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) ||
-				mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
-			{
-				var Tower = ObjectManager.Get<Obj_AI_Turret>().Where(t => !t.IsDead && t.IsAlly && Me.Distance(t) <= 1800).OrderBy(t => t.Distance(Me)).FirstOrDefault();
-				if (Tower != null)
-				{
-					var UnderTowerMinions = EntityManager.MinionsAndMonsters.Minions
-						.Where(m => m.isValidAATarget() && m.Distance(Tower) <= 900)
-						.OrderByDescending(minion => minion.CharData.BaseSkinName.Contains("Siege"))						
-						.ThenBy(minion => minion.CharData.BaseSkinName.Contains("Super"))
-						.ThenByDescending(minion => minion.MaxHealth)
-						.ThenByDescending(minion => minion.Health);
-					if (UnderTowerMinions.Any())
-					{
-						var AggroMinion = UnderTowerMinions.FirstOrDefault(m => true);
-					}
-				}
-			}
-
-
-			return null;
+			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Combo))
+				return;
+			var bestTarget = GetKillableAutoAttackTarget() ?? GetEnemyTarget();
+			bestTarget.ExecuteAttack();
 		}
+
+		private static void LastHitModeAttack()
+		{
+			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit))
+				return;
+			var bestTarget = GetKillableAutoAttackTarget() ?? GetLasthitMinion();
+			bestTarget.ExecuteAttack();
+		}
+
+		private static void HarrasModeAttack()
+		{
+			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Harass))
+				return;
+			if (WaitForMinion())
+				return;
+			switch (FarmPrioritie)
+			{
+				case true:
+					var PrioFarmTarget = (GetKillableAutoAttackTarget() ?? GetLasthitMinion()) ?? GetEnemyTarget();
+					PrioFarmTarget.ExecuteAttack();
+					break;
+				case false:
+					var PrioHarrasTarget = (GetKillableAutoAttackTarget() ?? GetEnemyTarget()) ?? GetLasthitMinion();
+					PrioHarrasTarget.ExecuteAttack();
+					break;
+			}
+		}
+		private static void LaneClearModeAttack()
+		{
+			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
+				return;
+			if (WaitForMinion())
+				return;
+				var PrioFarmTarget = (GetKillableAutoAttackTarget() ?? GetLasthitMinion()) ?? GetLaneClearMinion();
+				PrioFarmTarget.ExecuteAttack();	
+		}
+
+		private static AttackableUnit GetEnemyTarget()
+		{
+			// todo need a much better focus...
+			return TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
+		}
+
+		private static AttackableUnit GetLasthitMinion()
+		{
+			var Minions = EntityManager.MinionsAndMonsters.Minions
+						.Where(m => m.isValidAATarget())
+						.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
+						.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
+						.ThenBy(m => m.Health)
+						.ThenByDescending(m => m.MaxHealth);
+			return (from Minion in Minions let healthPred = Prediction.Health.GetPrediction(Minion, MissileHitTime(Minion)) where healthPred <= Me.GetAutoAttackDamageOverride(Minion, true) select Minion).FirstOrDefault();
+		}
+		private static AttackableUnit GetLasthitMonster()
+		{
+			var Minions = EntityManager.MinionsAndMonsters.Monsters
+						.Where(m => m.isValidAATarget())
+						.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
+						.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
+						.ThenBy(m => m.Health)
+						.ThenByDescending(m => m.MaxHealth);
+			return (from Minion in Minions let healthPred = Prediction.Health.GetPrediction(Minion, MissileHitTime(Minion)) where healthPred <= Me.GetAutoAttackDamageOverride(Minion, true) select Minion).FirstOrDefault();
+		}
+
+		private static AttackableUnit GetLaneClearMinion()
+		{
+			var Minions = EntityManager.MinionsAndMonsters.Minions
+						.Where(m => m.isValidAATarget())
+						.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
+						.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
+						.ThenBy(m => m.Health)
+						.ThenByDescending(m => m.MaxHealth);
+			return (from Minion in Minions let healthPred = Prediction.Health.GetPrediction(Minion, (int)(Me.AttackDelay * 2 + MissileHitTime(Minion) * 2)) where (healthPred >= Me.GetAutoAttackDamageOverride(Minion, false) * 2 ) select Minion).FirstOrDefault();
+		}
+
+		private static AttackableUnit GetJungleClearMonster()
+		{
+			var Monster = EntityManager.MinionsAndMonsters.Monsters
+						.Where(m => m.isValidAATarget())
+						.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
+						.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
+						.ThenBy(m => m.Health)
+						.ThenByDescending(m => m.MaxHealth)
+						.FirstOrDefault();
+			return Monster;
+		}
+		private static void ExecuteAttack(this AttackableUnit target)
+		{
+			if (target != null)
+				Player.IssueOrder(GameObjectOrder.AttackUnit, target);
+		}		
 
 		private static bool WaitForMinion()
 		{
+			if (GetLasthitMinion() != null)
+				return false;
 			return EntityManager.MinionsAndMonsters.Minions.Any(m => m.isValidAATarget() &&
 																	 Prediction.Health.GetPrediction(m,
 																		 (int)(Me.AttackDelay * 1000 * 2)) <=

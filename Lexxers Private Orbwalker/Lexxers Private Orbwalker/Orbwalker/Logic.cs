@@ -154,6 +154,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				if (bestTarget != null)
 					return bestTarget;
 			}
+
+			// laneclear basic
 			if ((mode == EloBuddy.SDK.Orbwalker.ActiveModes.Harass ||
 				(mode == EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear)) && !WaitForMinion())
 			{
@@ -200,7 +202,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				                                                         (int) (Me.AttackDelay*1000*2 + GetRandomFarmDelay)) <=
 			                                                         Me.GetAutoAttackDamageOverride(m, false)*2 &&
 			                                                         Prediction.Health.GetPrediction(m,
-				                                                         (int) (Me.AttackDelay*1000*2 + GetRandomFarmDelay)) <
+				                                                         (int) (Me.AttackDelay*1000*2 + GetRandomFarmDelay)) >
 			                                                         m.Health);
 		}
 

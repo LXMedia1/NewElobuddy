@@ -162,6 +162,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				o.BaseSkinName == "HeimerTYellow" ||
 				o.BaseSkinName == "Tibbers" ||
 				o.BaseSkinName == "VoidGate" ||
+				o.BaseSkinName == "Barrel" ||
 				o.BaseSkinName == "ShacoBox" ));
 		}
 

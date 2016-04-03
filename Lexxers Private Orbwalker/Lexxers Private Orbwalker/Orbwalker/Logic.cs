@@ -164,9 +164,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			return ObjectManager.Get<Obj_AI_Base>().FirstOrDefault(o => o.isValidAATarget() &&
 				(o.BaseSkinName == "HeimerTblue" ||
 				o.BaseSkinName == "HeimerTYellow" ||
-				o.BaseSkinName == "Tibbers" ||
+				o.Name == "Tibbers" ||
 				o.BaseSkinName == "VoidGate" ||
-				o.BaseSkinName == "Barrel" ||
+				o.Name == "Barrel" ||
 				o.BaseSkinName == "ShacoBox" ));
 		}
 

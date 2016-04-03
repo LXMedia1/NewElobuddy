@@ -19,8 +19,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Config_Behavier.AddGroupLabel("Priorities:");
 			Config_Behavier.AddLabel("Prioritie Farm </> EnemyHit ( for Harras )");
 			Config_Behavier.Add("priorityFarm", new CheckBox("Farm", true));
+
 			Config_Extra = Config.AddSubMenu("Extra", "orbwalker.extra", "Extra Settings");
-			Config_Extra.Add("windup", new Slider("Additional Windup {0} ms", 200, 0, 500));
+			Config_Extra.Add("windup", new Slider("Additional Windup {0} ms", 120, 0, 500));
 		}
 	}
 }

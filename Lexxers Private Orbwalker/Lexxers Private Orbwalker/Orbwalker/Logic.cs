@@ -110,11 +110,11 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Harass))
 				return;
-			if (WaitForMinion())
-				return;
 			switch (FarmPrioritie)
 			{
 				case true:
+					if (WaitForMinion())
+						return;
 					var PrioFarmTarget = (GetKillableAutoAttackTarget() ?? GetLasthitMinion()) ?? GetEnemyTarget();
 					PrioFarmTarget.ExecuteAttack();
 					break;
@@ -144,7 +144,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 		private static AttackableUnit GetNearEnemyTower()
 		{
-			var Tower = EntityManager.MinionsAndMonsters.Minions
+			var Tower = ObjectManager.Get<Obj_AI_Turret>()
 						.Where(t => t.isValidAATarget())
 						.OrderBy(t=> t.Distance(Me))
 						.FirstOrDefault();

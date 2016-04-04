@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu.Values;
@@ -22,7 +23,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		private static int _moveDelay;
 		private static int _attackDelay;
 		private static int _farmDelay;
-		private static int _RandomDelay = 300;
+		private const int _RandomDelay = 300;
 		private static int _RandomDelayTick;
 
 		internal static void Load()
@@ -50,17 +51,15 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		{
 			SetRandumValues();
 
-			var mode = GetCurrentMode();
-
 			if (Me.IsDead && !Me.IsZombie)
 				return;
-			Attack(mode);
-			Move(mode);
+			Attack();
+			Move();
 		}
 
-		private static void Attack(List<EloBuddy.SDK.Orbwalker.ActiveModes> mode)
+		private static void Attack()
 		{
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.None) )
+			if (!HaveAnyModeActive())
 				return;
 			if (LastAutoAttackTick + GetRandomAttackDelay > Core.GameTickCount)
 				return;
@@ -77,9 +76,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}		
 		}
 
-		private static void Move(List<EloBuddy.SDK.Orbwalker.ActiveModes> mode)
+		private static void Move()
 		{
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.None))
+			if (!HaveAnyModeActive())
 				return;
 			var extraWindUp = 0;
 			if (Me.Hero == Champion.Rengar && (Player.HasBuff("rengarqbase") || Player.HasBuff("rengarqemp")))
@@ -128,6 +127,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			var bestTarget = GetKillableAutoAttackTarget() ?? GetLasthitMinion();
 			bestTarget.ExecuteAttack();
 		}
+		
 		private static void HarrasModeAttack()
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Harass))
@@ -170,6 +170,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			target.ExecuteAttack();	
 				
 		}
+		
 		private static void LaneClearModeAttack()
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
@@ -203,6 +204,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 			target.ExecuteAttack();	
 		}
+		
 		private static void JungleClearModeAttack()
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear))
@@ -233,6 +235,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 			target.ExecuteAttack();
 		}
+		
 		private static void FleeModeAttack()
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Flee))
@@ -299,6 +302,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 						.ThenByDescending(m => m.MaxHealth);
 			return (from Minion in Minions let healthPred = Prediction.Health.GetPrediction(Minion, MissileHitTime(Minion)) where healthPred <= Me.GetAutoAttackDamageOverride(Minion, true) select Minion).FirstOrDefault();
 		}
+		
 		private static AttackableUnit GetLasthitMonster()
 		{
 			var Minions = EntityManager.MinionsAndMonsters.Monsters
@@ -420,43 +424,23 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			{
 				LastAutoAttackTick = Core.GameTickCount + Game.Ping;
 				LastAutoAttackTarget = args.Target;
-				if (Me.Hero == Champion.Rengar && Me.HasBuff("rengarpassivebuff") && args.Target.Type == GameObjectType.obj_AI_Base)
-					LastAutoAttackTick = 0;
 			}
 		}
 
-		
+
 
 		private static void SetRandumValues()
 		{
 			if (_RandomDelayTick + _RandomDelay < Core.GameTickCount)
 			{
 				_RandomDelayTick = Core.GameTickCount;
-				_moveDelay = new Random().Next(80, 130);
-				_attackDelay = new Random().Next(80, 130);
-				_farmDelay = new Random().Next(0, 50);
+				var rnd = new Random();
+				_moveDelay = rnd.Next(80, 130);
+				_attackDelay = rnd.Next(80, 130);
+				_farmDelay = rnd.Next(0, 50);
 			}
 		}
 
-		private static List<EloBuddy.SDK.Orbwalker.ActiveModes> GetCurrentMode()
-		{
-			var list = new List<EloBuddy.SDK.Orbwalker.ActiveModes>();
-			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Combo))
-				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.Combo);
-			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Harass))
-				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.Harass);
-			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
-				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear);
-			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear))
-				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear);
-			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit))
-				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit);
-			if (EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Flee))
-				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.Flee);
-			if (list.Count <= 0)
-				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.None);
-			return list;
-		}
 		public static int HoldArea
 		{
 			get { return Menu.Config_Extra["holdArea"].Cast<Slider>().CurrentValue; }
@@ -493,6 +477,16 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		public static int GetRandomAttackDelay
 		{
 			get { return _attackDelay; }
+		}
+
+		public static bool HaveAnyModeActive()
+		{
+			return EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Combo) ||
+			       EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Harass) ||
+			       EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear) ||
+			       EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear) ||
+			       EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit) ||
+			       EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Flee);
 		}
 	}
 }

@@ -23,7 +23,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Config_Behavier.AddLabel("Prioritie Farm </> EnemyHit ( for Harras )");
 			Config_Behavier.Add("priorityFarm", new CheckBox("Farm", true));
 			Config_Behavier.AddLabel("Prioritie Big </> Small ( for JungleClear )");
-			Config_Behavier.Add("priorityJungleMin", new CheckBox("Pref Big Monster", true));
+			Config_Behavier.Add("priorityJungleBig", new CheckBox("Pref Big Monster", true));
 
 			Config_Behavier.AddGroupLabel("Custom Behavier:");
 			Config_Behavier.AddLabel("Attack Objects/Wards");

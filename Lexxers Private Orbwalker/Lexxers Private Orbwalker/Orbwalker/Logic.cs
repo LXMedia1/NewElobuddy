@@ -83,7 +83,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				return;
 			var extraWindUp = 0;
 			if (Me.Hero == Champion.Rengar && (Player.HasBuff("rengarqbase") || Player.HasBuff("rengarqemp")))
-				extraWindUp = (int)(60 * Math.PI);
+				extraWindUp = (int)(65 * Math.PI);
 			if (Me.Hero == Champion.Kalista ||   // no cancleChampion
 				Core.GameTickCount + Game.Ping / 2 >= LastAutoAttackTick + Me.AttackCastDelay * 1000 + WindUp + extraWindUp) // windup after AttackFinished
 			{
@@ -420,6 +420,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			{
 				LastAutoAttackTick = Core.GameTickCount + Game.Ping;
 				LastAutoAttackTarget = args.Target;
+				if (Me.Hero == Champion.Rengar && Me.HasBuff("rengarpassivebuff") && args.Target.Type == GameObjectType.obj_AI_Base)
+					LastAutoAttackTick = Core.GameTickCount + Game.Ping + MissileHitTime((Obj_AI_Base)args.Target);
 			}
 		}
 

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EloBuddy;
 using EloBuddy.SDK;
 using EloBuddy.SDK.Menu.Values;
@@ -26,7 +24,6 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		private static int _farmDelay;
 		private static int _RandomDelay = 300;
 		private static int _RandomDelayTick;
-		private static bool _MissleStarted;
 
 		internal static void Load()
 		{
@@ -37,7 +34,16 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 			Game.OnUpdate += OnFireLogic;
 			Player.OnIssueOrder += OnIssueOrder;
-			Obj_AI_Base.OnBasicAttack += OnAutoAttack;
+			Obj_AI_Base.OnSpellCast += OnSpellCast;
+		}
+
+		private static void OnSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+		{
+			if (sender.IsMe)
+			{
+				if (args.IsAutoAttackReset())
+					Core.DelayAction(() => LastAutoAttackTick = 0, 50);
+			}
 		}
 
 		private static void OnFireLogic(EventArgs args)
@@ -76,7 +82,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.None))
 				return;
 			var extraWindUp = 0;
-			// todo SpecialBuffs.
+			if (Me.Hero == Champion.Rengar && (Player.HasBuff("rengarqbase") || Player.HasBuff("rengarqemp")))
+				extraWindUp = (int)(60 * Math.PI);
 			if (Me.Hero == Champion.Kalista ||   // no cancleChampion
 				Core.GameTickCount + Game.Ping / 2 >= LastAutoAttackTick + Me.AttackCastDelay * 1000 + WindUp + extraWindUp) // windup after AttackFinished
 			{
@@ -416,13 +423,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 		}
 
-		private static void OnAutoAttack(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-		{
-			if (sender.IsMe)
-			{
-				// todo attackresetCheck
-			}
-		}
+		
 
 		private static void SetRandumValues()
 		{

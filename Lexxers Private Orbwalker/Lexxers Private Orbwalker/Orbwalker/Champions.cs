@@ -10,6 +10,11 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 {
 	static class Champions
 	{
+		public static bool IsAutoAttackReset(this GameObjectProcessSpellCastEventArgs args)
+		{
+			return AutoAttackResetSpellNames.Contains(args.SData.Name);
+		}
+
 		public static DamageType GetAutoAttackDamageType(this AIHeroClient unit)
 		{
 			switch (unit.Hero)
@@ -41,5 +46,15 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 			return Attacker.GetSpellDamage(Target, slot, stage);
 		}
+		private static readonly string[] AutoAttackResetSpellNames =
+        {
+            "dariusnoxiantacticsonh", "fioraflurry", "garenq",
+            "gravesmove", "hecarimrapidslash", "jaxempowertwo", "jaycehypercharge", "leonashieldofdaybreak", "luciane",
+            "monkeykingdoubleattack", "mordekaisermaceofspades", "nasusq", "nautiluspiercinggaze", "netherblade",
+            "gangplankqwrapper", "poppypassiveattack", "powerfist", "renektonpreexecute", "rengarq",
+            "shyvanadoubleattack", "sivirw", "takedown", "talonnoxiandiplomacy", "trundletrollsmash", "vaynetumble",
+            "vie", "volibearq", "xenzhaocombotarget", "yorickspectral", "reksaiq", "itemtitanichydracleave", "masochism",
+            "illaoiw", "elisespiderw", "fiorae", "meditate", "sejuaninorthernwinds"      
+        };
 	}
 }

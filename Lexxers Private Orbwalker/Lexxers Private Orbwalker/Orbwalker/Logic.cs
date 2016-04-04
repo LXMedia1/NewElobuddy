@@ -421,7 +421,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				LastAutoAttackTick = Core.GameTickCount + Game.Ping;
 				LastAutoAttackTarget = args.Target;
 				if (Me.Hero == Champion.Rengar && Me.HasBuff("rengarpassivebuff") && args.Target.Type == GameObjectType.obj_AI_Base)
-					LastAutoAttackTick = Core.GameTickCount + Game.Ping + MissileHitTime((Obj_AI_Base)args.Target);
+					LastAutoAttackTick = 0;
 			}
 		}
 

@@ -141,7 +141,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 					Axe[] axe = { null };
 					foreach (var obj in AxeList.Where(obj => axe[0] == null || obj.CreationTime < axe[0].CreationTime))
 						axe[0] = obj;
-					if (axe[0] != null)
+					if (axe[0] != null && axe[0].Position.Distance(Game.CursorPos) < InteractRange)
 					{
 						var distanceNorm = Vector2.Distance(axe[0].Position.To2D(), Me.ServerPosition.To2D()) - Me.BoundingRadius;
 						var distanceBuffed = Me.GetPath(axe[0].Position).ToList().Select(point => point.To2D()).ToList().PathLength();

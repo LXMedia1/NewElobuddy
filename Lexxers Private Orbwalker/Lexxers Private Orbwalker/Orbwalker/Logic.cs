@@ -66,6 +66,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				LastHitModeAttack();
 				HarrasModeAttack();
 				LaneClearModeAttack();
+				JungleClearModeAttack();
+				FleeModeAttack();
 			}		
 		}
 
@@ -94,10 +96,22 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Combo))
 				return;
-			var bestTarget = GetKillableAutoAttackTarget() ?? GetEnemyTarget();
-			bestTarget.ExecuteAttack();
-		}
+			var target = GetKillableAutoAttackTarget();
 
+			if (target == null)
+				target = GetEnemyTarget();
+
+			if (target == null)
+				target = GetNearEnemyNexus();
+
+			if (target == null)
+				target = GetNearEnemyInhibitor();
+
+			if (target == null)
+				target = GetNearEnemyTower();
+
+			target.ExecuteAttack();	
+		}
 		private static void LastHitModeAttack()
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit))
@@ -105,33 +119,63 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			var bestTarget = GetKillableAutoAttackTarget() ?? GetLasthitMinion();
 			bestTarget.ExecuteAttack();
 		}
-
 		private static void HarrasModeAttack()
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Harass))
 				return;
-			switch (FarmPrioritie)
+
+			var target = GetKillableAutoAttackTarget();
+
+			if (FarmPrioritie)
 			{
-				case true:
-					if (WaitForMinion())
-						return;
-					var PrioFarmTarget = (GetKillableAutoAttackTarget() ?? GetLasthitMinion()) ?? GetEnemyTarget();
-					PrioFarmTarget.ExecuteAttack();
-					break;
-				case false:
-					var PrioHarrasTarget = (GetKillableAutoAttackTarget() ?? GetEnemyTarget()) ?? GetLasthitMinion();
-					PrioHarrasTarget.ExecuteAttack();
-					break;
+				if (target == null)
+					target = GetLasthitMinion();
+				if (target == null)
+					target = GetLasthitMonster();
 			}
+
+			if (target == null )
+				target = GetNearEnemyNexus();
+
+			if (target == null )
+				target = GetNearEnemyInhibitor();
+
+			if (target == null && (!WaitForMinion() || !FarmPrioritie))
+				target = GetNearEnemyTower();
+
+			if (target == null && (!WaitForMinion() || !FarmPrioritie))
+				target = GetEnemyTarget();
+
+			if (target == null && (!WaitForMinion() || !FarmPrioritie))
+				target = GetLasthitMinion();
+
+			if (target == null && (!WaitForMinion() || !FarmPrioritie))
+				target = GetLasthitMonster();
+
+			if (target == null && (!WaitForMinion() || !FarmPrioritie))
+				target = GetNearEnemyObjects();
+
+			if (target == null && (!WaitForMinion() || !FarmPrioritie))
+				target = GetNearEnemyWard();
+
+			target.ExecuteAttack();	
+				
 		}
 		private static void LaneClearModeAttack()
 		{
 			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LaneClear))
 				return;
+
 			var target = GetKillableAutoAttackTarget();
 
 			if (target == null)
 				target = GetLasthitMinion();
+
+			if (target == null)
+				target = GetNearEnemyNexus();
+
+			if (target == null)
+				target = GetNearEnemyInhibitor();
 
 			if (target == null)
 				target = GetNearEnemyTower();
@@ -142,10 +186,60 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			if (target == null)
 				target = GetNearEnemyWard();
 
+			if (target == null&& !WaitForMinion())
+				target = GetEnemyTarget();
+
 			if (target == null && !WaitForMinion())
 				target = GetLaneClearMinion();
 
 			target.ExecuteAttack();	
+		}
+		private static void JungleClearModeAttack()
+		{
+			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear))
+				return;
+
+			var target = GetKillableAutoAttackTarget();
+
+			if (target == null)
+				target = GetLasthitMonster();
+
+			if (target == null)
+				target = GetNearEnemyNexus();
+
+			if (target == null)
+				target = GetNearEnemyInhibitor();
+
+			if (target == null)
+				target = GetNearEnemyTower();
+
+			if (target == null)
+				target = GetNearEnemyObjects();
+
+			if (target == null)
+				target = GetNearEnemyWard();
+
+			if (target == null)
+				target = GetJungleClearMonster();
+
+			target.ExecuteAttack();
+		}
+		private static void FleeModeAttack()
+		{
+			if (!EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Flee))
+				return;
+			var bestTarget = GetKillableAutoAttackTarget();
+			bestTarget.ExecuteAttack();
+		}
+
+		private static AttackableUnit GetNearEnemyInhibitor()
+		{
+			return ObjectManager.Get<Obj_BarracksDampener>().FirstOrDefault(w => w.isValidAATarget());
+		}
+
+		private static AttackableUnit GetNearEnemyNexus()
+		{
+			return ObjectManager.Get<Obj_HQ>().FirstOrDefault(w => w.isValidAATarget());
 		}
 
 		private static AttackableUnit GetNearEnemyWard()
@@ -166,6 +260,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				o.BaseSkinName == "HeimerTYellow" ||
 				o.Name == "Tibbers" ||
 				o.BaseSkinName == "VoidGate" ||
+				o.BaseSkinName == "VoidSpawn" ||
 				o.Name == "Barrel" ||
 				o.BaseSkinName == "ShacoBox" ));
 		}
@@ -253,7 +348,24 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		{
 			return ObjectManager.Get<AIHeroClient>().Where(u => u.isValidAATarget());
 		}
-
+		private static bool isValidAATarget(this Obj_HQ nexus)
+		{
+			if (nexus.IsDead || nexus.IsAlly)
+				return false;
+			var attackrange = Me.AttackRange + Me.BoundingRadius + nexus.BoundingRadius;
+			if (!nexus.IsValidTarget(attackrange, true))
+				return false;
+			return true;
+		}
+		private static bool isValidAATarget(this Obj_BarracksDampener inhib)
+		{
+			if (inhib.IsDead || inhib.IsAlly)
+				return false;
+			var attackrange = Me.AttackRange + Me.BoundingRadius + inhib.BoundingRadius;
+			if (!inhib.IsValidTarget(attackrange,true))
+				return false;
+			return true;
+		}
 		private static bool isValidAATarget(this Obj_AI_Base unit)
 		{
 			if (unit.IsDead || unit.IsAlly)

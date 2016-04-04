@@ -22,6 +22,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Config_Behavier.AddGroupLabel("Priorities:");
 			Config_Behavier.AddLabel("Prioritie Farm </> EnemyHit ( for Harras )");
 			Config_Behavier.Add("priorityFarm", new CheckBox("Farm", true));
+			Config_Behavier.AddLabel("Prioritie Big </> Small ( for JungleClear )");
+			Config_Behavier.Add("priorityJungleMin", new CheckBox("Pref Big Monster", true));
 
 			Config_Behavier.AddGroupLabel("Custom Behavier:");
 			Config_Behavier.AddLabel("Attack Objects/Wards");
@@ -35,7 +37,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 			Config_Behavier.AddLabel("Movement Prediction: If Aktive will Semiautomatic your Movement on Melees (for Combo)");
 			Config_Behavier.Add("meleePrediction1", new CheckBox("Melee Movement Prediction VollAuto", false));
-			Config_Behavier.Add("meleePrediction2", new CheckBox("Melee Movement Prediction SemiAuto", true));
+			Config_Behavier.Add("meleePrediction2", new CheckBox("Melee Movement Prediction SemiAuto", false));
 
 			Config_Drawing = Config.AddSubMenu("Drawings", "orbwalker.drawings", "Drawing Settings");
 			Config_Drawing.AddLabel("Basic Drawing Rules For Your Hero");

@@ -357,14 +357,21 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 		private static AttackableUnit GetJungleClearMonster()
 		{
-			var Monster = EntityManager.MinionsAndMonsters.Monsters
+			if (!PriorityJungleMin)
+			return EntityManager.MinionsAndMonsters.Monsters
 						.Where(m => m.isValidAATarget())
 						.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
 						.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
 						.ThenBy(m => m.Health)
 						.ThenByDescending(m => m.MaxHealth)
 						.FirstOrDefault();
-			return Monster;
+			return EntityManager.MinionsAndMonsters.Monsters
+						.Where(m => m.isValidAATarget())
+						.OrderBy(m => m.CharData.BaseSkinName.Contains("Siege"))
+						.ThenBy(m => m.CharData.BaseSkinName.Contains("Super"))
+						.ThenByDescending(m => m.Health)
+						.ThenByDescending(m => m.MaxHealth)
+						.FirstOrDefault();
 		}
 		private static void ExecuteAttack(this AttackableUnit target)
 		{
@@ -479,6 +486,10 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 		}
 
+		public static bool PriorityJungleMin
+		{
+			get { return Menu.Config_Behavier["priorityJungleMin"].Cast<CheckBox>().CurrentValue; }
+		}
 		public static bool MeleePrediction1
 		{
 			get { return Menu.Config_Behavier["meleePrediction1"].Cast<CheckBox>().CurrentValue; }

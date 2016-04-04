@@ -54,7 +54,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 
 		private static void Attack(List<EloBuddy.SDK.Orbwalker.ActiveModes> mode)
 		{
-			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.None))
+			if (mode.Contains(EloBuddy.SDK.Orbwalker.ActiveModes.None) )
 				return;
 			if (LastAutoAttackTick + GetRandomAttackDelay > Core.GameTickCount)
 				return;
@@ -86,6 +86,8 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 					? Game.CursorPos
 					: Override_MoveToPosition;
 				if (goalPosition == Vector3.Zero)
+					return;
+				if (goalPosition.Distance(Me) <= HoldArea && Override_MoveToPosition == Vector3.Zero)
 					return;
 				if (LastMovementPos.Distance(goalPosition) < 10)
 					return;
@@ -325,7 +327,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		}
 		private static void ExecuteAttack(this AttackableUnit target)
 		{
-			if (target != null)
+			if (target != null && Me.CanAttack)
 				Player.IssueOrder(GameObjectOrder.AttackUnit, target);
 		}		
 
@@ -452,7 +454,10 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				list.Add(EloBuddy.SDK.Orbwalker.ActiveModes.None);
 			return list;
 		}
-
+		public static int HoldArea
+		{
+			get { return Menu.Config_Extra["holdArea"].Cast<Slider>().CurrentValue; }
+		}
 		public static bool RemoveObjects
 		{
 			get { return Menu.Config_Behavier["removeObjects"].Cast<CheckBox>().CurrentValue; }

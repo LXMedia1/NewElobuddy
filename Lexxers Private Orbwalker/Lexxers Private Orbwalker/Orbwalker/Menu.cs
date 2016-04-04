@@ -8,15 +8,15 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		public static EloBuddy.SDK.Menu.Menu Config;
 		public static EloBuddy.SDK.Menu.Menu Config_Behavier;
 		public static EloBuddy.SDK.Menu.Menu Config_Extra;
-
+		public static EloBuddy.SDK.Menu.Menu Config_Drawing;
 		internal static void Load()
 		{
 			Config = MainMenu.AddMenu("LX-Orbwalker", "orbwalker", "Lexxers Orbwalker");
 			Config.AddLabel("It uses the Elobuddy Orbwalker Keys but nothing else from it.");
 			Config.AddLabel("LX Orbwalker will disable Orbwalker as far he can but you still should disable Drawing.");
 
-			Config_Behavier = Config.AddSubMenu("Behavier", "orbwalker.behavier", "Behavier´s");
-			
+			Config_Behavier = Config.AddSubMenu("Behavier", "orbwalker.behavier", "Behavier´s");		
+	
 			Config_Behavier.AddGroupLabel("Priorities:");
 			Config_Behavier.AddLabel("Prioritie Farm </> EnemyHit ( for Harras )");
 			Config_Behavier.Add("priorityFarm", new CheckBox("Farm", true));
@@ -26,8 +26,24 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Config_Behavier.Add("removeObjects", new CheckBox("Objects", true));
 			Config_Behavier.Add("removeWards", new CheckBox("Wards", true));
 
+			Config_Drawing = Config.AddSubMenu("Drawings", "orbwalker.drawings", "Drawing Settings");
+			Config_Drawing.AddLabel("Basic Drawing Rules For Your Hero");
+			Config_Drawing.Add("drawMyAARange", new CheckBox("Draw AA Range"));
+			Config_Drawing.Add("drawMyHoldArea",new CheckBox("Draw Hold Area"));
+
+			Config_Drawing.AddLabel("Basic Drawing Rules For Enemys");
+			Config_Drawing.Add("drawEnemyAARange", new CheckBox("Draw AA Range"));
+			Config_Drawing.Add("drawEnemyBoundingRadius", new CheckBox("Draw BoundingRadius"));
+
 			Config_Extra = Config.AddSubMenu("Extra", "orbwalker.extra", "Extra Settings");
-			Config_Extra.Add("windup", new Slider("Additional Windup {0} ms", 120, 0, 500));
+			Config_Extra.AddLabel("Windup: Its the Time After a Attack before he can Move again.");
+			Config_Extra.AddLabel("If you have Increased AA Cancle set this Higher");
+			Config_Extra.Add("windup", new Slider("Additional Windup time: {0} ms", 120, 0, 500));
+
+			Config_Extra.AddLabel("HoldArea: Its a Range Around your Hero.");
+			Config_Extra.AddLabel("If your Mouse is inside this Area he wont move to your Cursor ( 0 to Disable)");
+			Config_Extra.Add("holdArea", new Slider("HoldArea distance: {0}", 100, 0, 500));
+
 		}
 	}
 }

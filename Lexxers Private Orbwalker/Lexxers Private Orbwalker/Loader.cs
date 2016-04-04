@@ -11,7 +11,7 @@ namespace Lexxers_Private_Orbwalker
 		internal static void Initiate()
 		{
 			Orbwalker.Menu.Load();
-
+			Orbwalker.Drawing.Load();
 			Orbwalker.Logic.Load();
 		}
 	}

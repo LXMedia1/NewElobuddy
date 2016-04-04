@@ -73,6 +73,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -82,6 +83,7 @@
   <ItemGroup>
     <Compile Include="Loader.cs" />
     <Compile Include="Orbwalker\Champions.cs" />
+    <Compile Include="Orbwalker\Drawing.cs" />
     <Compile Include="Orbwalker\Logic.cs" />
     <Compile Include="Orbwalker\Menu.cs" />
     <Compile Include="Program.cs" />

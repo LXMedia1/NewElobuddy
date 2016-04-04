@@ -86,18 +86,48 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			if (Me.Hero == Champion.Kalista ||   // no cancleChampion
 				Core.GameTickCount + Game.Ping / 2 >= LastAutoAttackTick + Me.AttackCastDelay * 1000 + WindUp + extraWindUp) // windup after AttackFinished
 			{
+				bool AutoSetPosition = false;
 				if (LastMovementTick + GetRandomMoveDelay > Core.GameTickCount)
 					return;
+				
+				if (Me.IsMelee && InteractRange > 0 && (MeleePrediction1 || MeleePrediction2) &&
+				    EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Combo))
+				{
+					if (MeleePrediction1)
+					{
+						var target = GetEnemyTarget(true);
+						if (target != null && target.Distance(Game.CursorPos) <= InteractRange && target.Type == GameObjectType.AIHeroClient)
+						{
+							var xtarget = (AIHeroClient)target;
+							Override_MoveToPosition = xtarget.GetMovementPrediction();
+							AutoSetPosition = true;
+						}
+					}
+					else if (MeleePrediction2)
+					{
+						var target = GetEnemyTarget(true);
+						if (target != null && target.Distance(Game.CursorPos) <= InteractRange && target.Type == GameObjectType.AIHeroClient)
+						{
+							var xtarget = (AIHeroClient)target;
+							Override_MoveToPosition = xtarget.Position.V3E(Game.CursorPos, Me.AttackRange);
+							AutoSetPosition = true;
+						}
+					}
+				}
+
 				var goalPosition = (Override_MoveToPosition == Vector3.Zero && Game.CursorPos.IsValid())
 					? Game.CursorPos
 					: Override_MoveToPosition;
+
 				if (goalPosition == Vector3.Zero)
 					return;
-				if (goalPosition.Distance(Me) <= HoldArea && Override_MoveToPosition == Vector3.Zero)
+
+				if (goalPosition.Distance(Me) <= HoldArea && Override_MoveToPosition == Vector3.Zero && AutoSetPosition)
 					return;
-				if (LastMovementPos.Distance(goalPosition) < 10)
+				if (LastMovementPos.Distance(goalPosition) < 10 && AutoSetPosition)
 					return;
 				Player.IssueOrder(GameObjectOrder.MoveTo, goalPosition);
+				Override_MoveToPosition = Vector3.Zero;
 			}
 		}
 		private static void ComboModeAttack()
@@ -286,10 +316,10 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			return Tower;
 		}
 
-		private static AttackableUnit GetEnemyTarget()
+		private static AttackableUnit GetEnemyTarget(bool meleePred = false)
 		{
 			// todo need a much better focus...
-			return TargetSelector.GetTarget(GetPossibleTargets(), Me.GetAutoAttackDamageType());
+				return TargetSelector.GetTarget(GetPossibleTargets(meleePred), Me.GetAutoAttackDamageType());
 		}
 
 		private static AttackableUnit GetLasthitMinion()
@@ -357,9 +387,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			return GetPossibleTargets().FirstOrDefault(u=> u.Health <= Me.GetAutoAttackDamageOverride(u,true));
 		}
 
-		private static IEnumerable<AIHeroClient> GetPossibleTargets()
+		private static IEnumerable<AIHeroClient> GetPossibleTargets(bool meleepred = false)
 		{
-			return ObjectManager.Get<AIHeroClient>().Where(u => u.isValidAATarget());
+			return ObjectManager.Get<AIHeroClient>().Where(u => u.isValidAATarget(meleepred));
 		}
 		private static bool isValidAATarget(this Obj_HQ nexus)
 		{
@@ -379,7 +409,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				return false;
 			return true;
 		}
-		private static bool isValidAATarget(this Obj_AI_Base unit)
+		private static bool isValidAATarget(this Obj_AI_Base unit,bool meleepred = false)
 		{
 			if (unit.IsDead || unit.IsAlly)
 				return false;
@@ -393,11 +423,19 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				return false;
 			if (unit.Name == "WardCorpse" || unit.CharData.BaseSkinName == "jarvanivstandard")
 				return false;
-			var attackrange = Me.AttackRange + Me.BoundingRadius + unit.BoundingRadius;
-			if (Me.Hero == Champion.Caitlyn && unit.HasBuff("caitlynyordletrapinternal"))
-				attackrange += 650;
-			if (!unit.IsValidTarget(attackrange, true))
-				return false;
+			if (meleepred)
+			{
+				if (!(unit.IsValidTarget(99999, true) && Game.CursorPos.Distance(unit) <= InteractRange))
+					return false;
+			}
+			else
+			{
+				var attackrange = Me.AttackRange + Me.BoundingRadius + unit.BoundingRadius;
+				if (Me.Hero == Champion.Caitlyn && unit.HasBuff("caitlynyordletrapinternal"))
+					attackrange += 650;
+				if (!unit.IsValidTarget(attackrange, true))
+					return false;
+			}
 			return true;
 		}
 
@@ -441,6 +479,18 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 		}
 
+		public static bool MeleePrediction1
+		{
+			get { return Menu.Config_Behavier["meleePrediction1"].Cast<CheckBox>().CurrentValue; }
+		}
+		public static bool MeleePrediction2
+		{
+			get { return Menu.Config_Behavier["meleePrediction2"].Cast<CheckBox>().CurrentValue; }
+		}
+		public static int InteractRange
+		{
+			get { return Menu.Config_Behavier["interactRange"].Cast<Slider>().CurrentValue; }
+		}
 		public static int HoldArea
 		{
 			get { return Menu.Config_Extra["holdArea"].Cast<Slider>().CurrentValue; }

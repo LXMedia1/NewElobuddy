@@ -39,9 +39,22 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				{
 					EloBuddy.SDK.Rendering.Circle.Draw(SharpDX.Color.Black, enemy.AttackRange + enemy.BoundingRadius + Me.BoundingRadius, 2, enemy);
 				}
+			if (DrawInteractCircle && InteractRange > 0)
+			{
+				var curserPos = Game.CursorPos;
+				if (curserPos.IsValid())
+					EloBuddy.SDK.Rendering.Circle.Draw(SharpDX.Color.GreenYellow, InteractRange, 2, curserPos);
+			}
 		}
 
-
+		public static int InteractRange
+		{
+			get { return Menu.Config_Behavier["interactRange"].Cast<Slider>().CurrentValue; }
+		}
+		public static bool DrawInteractCircle
+		{
+			get { return Menu.Config_Drawing["drawInteractCircle"].Cast<CheckBox>().CurrentValue; }
+		}
 		public static bool DrawEnemyBoundingRadius
 		{
 			get { return Menu.Config_Drawing["drawEnemyBoundingRadius"].Cast<CheckBox>().CurrentValue; }

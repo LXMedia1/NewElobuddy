@@ -86,6 +86,7 @@
     <Compile Include="Orbwalker\Drawing.cs" />
     <Compile Include="Orbwalker\Logic.cs" />
     <Compile Include="Orbwalker\Menu.cs" />
+    <Compile Include="Prodiction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
+using SharpDX;
 
 namespace Lexxers_Private_Orbwalker.Orbwalker
 {
@@ -15,6 +16,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Config.AddLabel("It uses the Elobuddy Orbwalker Keys but nothing else from it.");
 			Config.AddLabel("LX Orbwalker will disable Orbwalker as far he can but you still should disable Drawing.");
 
+
 			Config_Behavier = Config.AddSubMenu("Behavier", "orbwalker.behavier", "Behavier´s");		
 	
 			Config_Behavier.AddGroupLabel("Priorities:");
@@ -26,6 +28,15 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Config_Behavier.Add("removeObjects", new CheckBox("Objects", true));
 			Config_Behavier.Add("removeWards", new CheckBox("Wards", true));
 
+			Config_Behavier.AddGroupLabel("Special Behaviers:");
+			Config_Behavier.AddLabel("POI Means for Melee the Target/ or some Objects (like Catching Axes from Draven)");
+			Config_Behavier.AddLabel("Interact Range: if will Change the MovementCommands if POI is inside this Range (from Curser)");
+			Config_Behavier.Add("interactRange", new Slider("Interact Range {0}", 350,0,800));
+
+			Config_Behavier.AddLabel("Movement Prediction: If Aktive will Semiautomatic your Movement on Melees (for Combo)");
+			Config_Behavier.Add("meleePrediction1", new CheckBox("Melee Movement Prediction VollAuto", false));
+			Config_Behavier.Add("meleePrediction2", new CheckBox("Melee Movement Prediction SemiAuto", true));
+
 			Config_Drawing = Config.AddSubMenu("Drawings", "orbwalker.drawings", "Drawing Settings");
 			Config_Drawing.AddLabel("Basic Drawing Rules For Your Hero");
 			Config_Drawing.Add("drawMyAARange", new CheckBox("Draw AA Range"));
@@ -34,6 +45,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Config_Drawing.AddLabel("Basic Drawing Rules For Enemys");
 			Config_Drawing.Add("drawEnemyAARange", new CheckBox("Draw AA Range"));
 			Config_Drawing.Add("drawEnemyBoundingRadius", new CheckBox("Draw BoundingRadius"));
+
+			Config_Drawing.AddLabel("Interact Range");
+			Config_Drawing.Add("drawInteractCircle", new CheckBox("Draw Interact Circle"));
 
 			Config_Extra = Config.AddSubMenu("Extra", "orbwalker.extra", "Extra Settings");
 			Config_Extra.AddLabel("Windup: Its the Time After a Attack before he can Move again.");

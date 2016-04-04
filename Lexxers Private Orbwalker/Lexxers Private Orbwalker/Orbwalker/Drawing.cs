@@ -39,7 +39,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				{
 					EloBuddy.SDK.Rendering.Circle.Draw(SharpDX.Color.Black, enemy.AttackRange + enemy.BoundingRadius + Me.BoundingRadius, 2, enemy);
 				}
-			if (DrawInteractCircle && InteractRange > 0)
+			if (DrawInteractCircle && InteractRange > 0 && (Me.IsMelee || Me.Hero == Champion.Draven))
 			{
 				var curserPos = Game.CursorPos;
 				if (curserPos.IsValid())

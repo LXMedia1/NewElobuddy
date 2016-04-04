@@ -26,6 +26,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		private const int _RandomDelay = 300;
 		private static int _RandomDelayTick;
 
+		public static List<Axe> AxeList = new List<Axe>(); 
 		internal static void Load()
 		{
 			Me = ObjectManager.Player;
@@ -36,8 +37,27 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Game.OnUpdate += OnFireLogic;
 			Player.OnIssueOrder += OnIssueOrder;
 			Obj_AI_Base.OnSpellCast += OnSpellCast;
+			GameObject.OnCreate += OnCreateObject;
+			GameObject.OnDelete += OnDeleteObject;
+
+		}
+		private static void OnCreateObject(GameObject sender, EventArgs args)
+		{
+			if (!sender.Name.Contains("Q_reticle_self"))
+				return;
+			AxeList.Add(new Axe(sender));
 		}
 
+		private static void OnDeleteObject(GameObject sender, EventArgs args)
+		{
+			if (!sender.Name.Contains("Q_reticle_self"))
+				return;
+			foreach (var axe in AxeList.Where(axe => axe.NetworkId == sender.NetworkId))
+			{
+				AxeList.Remove(axe);
+				return;
+			}
+		}
 		private static void OnSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
 		{
 			if (sender.IsMe)
@@ -110,6 +130,37 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 						{
 							var xtarget = (AIHeroClient)target;
 							Override_MoveToPosition = xtarget.Position.V3E(Game.CursorPos, Me.AttackRange);
+							AutoSetPosition = true;
+						}
+					}
+				}
+
+				if (Me.Hero == Champion.Draven && CatchAxes)
+				{
+					var Xover = false;
+					Axe[] axe = { null };
+					foreach (var obj in AxeList.Where(obj => axe[0] == null || obj.CreationTime < axe[0].CreationTime))
+						axe[0] = obj;
+					if (axe[0] != null)
+					{
+						var distanceNorm = Vector2.Distance(axe[0].Position.To2D(), Me.ServerPosition.To2D()) - Me.BoundingRadius;
+						var distanceBuffed = Me.GetPath(axe[0].Position).ToList().Select(point => point.To2D()).ToList().PathLength();
+						var canCatchAxeNorm = distanceNorm / Me.MoveSpeed + Game.Time < axe[0].EndTime;
+						var canCatchAxeBuffed = distanceBuffed / (Me.MoveSpeed + (5 * Champions.GetSpell_Draven_W().Level + 35) * 0.01 * Me.MoveSpeed + Game.Time) < axe[0].EndTime;
+
+						if (!CatchAxesW)
+							if (!canCatchAxeNorm)
+							{
+								AxeList.Remove(axe[0]);
+								Xover = true;
+							}
+						if (!Xover)
+						{
+							if ( canCatchAxeBuffed && !canCatchAxeNorm && Champions.GetSpell_Draven_W().IsReady() &&
+							     !axe[0].Catching())
+								Champions.GetSpell_Draven_W().Cast();
+
+							Override_MoveToPosition = axe[0].Position.V3E(Game.CursorPos, 49 + Me.BoundingRadius);
 							AutoSetPosition = true;
 						}
 					}
@@ -272,6 +323,16 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				return;
 			var bestTarget = GetKillableAutoAttackTarget();
 			bestTarget.ExecuteAttack();
+		}
+
+		public static float PathLength(this List<Vector2> path)
+		{
+			var distance = 0f;
+			for (var i = 0; i < path.Count - 1; i++)
+			{
+				distance += path[i].Distance(path[i + 1]);
+			}
+			return distance;
 		}
 
 		private static AttackableUnit GetNearEnemyInhibitor()
@@ -483,6 +544,14 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			}
 		}
 
+		public static bool CatchAxesW
+		{
+			get { return Menu.Config_Behavier["CatchAxesW"].Cast<CheckBox>().CurrentValue; }
+		}
+		public static bool CatchAxes
+		{
+			get { return Menu.Config_Behavier["CatchAxes"].Cast<CheckBox>().CurrentValue; }
+		}
 		public static bool PriorityJungleBig
 		{
 			get { return Menu.Config_Behavier["priorityJungleBig"].Cast<CheckBox>().CurrentValue; }
@@ -545,6 +614,34 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			       EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.JungleClear) ||
 			       EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.LastHit) ||
 			       EloBuddy.SDK.Orbwalker.ActiveModesFlags.HasFlag(EloBuddy.SDK.Orbwalker.ActiveModes.Flee);
+		}
+
+		public class Axe
+		{
+			public GameObject AxeObject;
+			public double CreationTime;
+			public double EndTime;
+			public int NetworkId;
+			public Vector3 Position;
+
+			public Axe(GameObject axeObject)
+			{
+				AxeObject = axeObject;
+				NetworkId = axeObject.NetworkId;
+				Position = axeObject.Position;
+				CreationTime = Game.Time;
+				EndTime = CreationTime + 1.2;
+			}
+
+			public float DistanceToPlayer()
+			{
+				return Me.Distance(Position);
+			}
+
+			public bool Catching()
+			{
+				return Me.Position.Distance(Position) <= 49 + Me.BoundingRadius / 2 + 50;
+			}
 		}
 	}
 }

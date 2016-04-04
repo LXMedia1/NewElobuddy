@@ -10,6 +10,11 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 {
 	static class Champions
 	{
+		public static Spell.Active GetSpell_Draven_W()
+		{
+			return new Spell.Active(SpellSlot.W);
+		}
+
 		public static bool IsAutoAttackReset(this GameObjectProcessSpellCastEventArgs args)
 		{
 			return AutoAttackResetSpellNames.Contains(args.SData.Name);

@@ -39,14 +39,21 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 				{
 					EloBuddy.SDK.Rendering.Circle.Draw(SharpDX.Color.Black, enemy.AttackRange + enemy.BoundingRadius + Me.BoundingRadius, 2, enemy);
 				}
-			if (DrawInteractCircle && InteractRange > 0 && (Me.IsMelee || Me.Hero == Champion.Draven))
+			if (DrawInteractCircle && InteractRange > 0 && (Me.IsMelee && (MeleePrediction1 || MeleePrediction2) || Me.Hero == Champion.Draven))
 			{
 				var curserPos = Game.CursorPos;
 				if (curserPos.IsValid())
 					EloBuddy.SDK.Rendering.Circle.Draw(SharpDX.Color.GreenYellow, InteractRange, 2, curserPos);
 			}
 		}
-
+		public static bool MeleePrediction1
+		{
+			get { return Menu.Config_Behavier["meleePrediction1"].Cast<CheckBox>().CurrentValue; }
+		}
+		public static bool MeleePrediction2
+		{
+			get { return Menu.Config_Behavier["meleePrediction2"].Cast<CheckBox>().CurrentValue; }
+		}
 		public static int InteractRange
 		{
 			get { return Menu.Config_Behavier["interactRange"].Cast<Slider>().CurrentValue; }

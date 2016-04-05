@@ -41,7 +41,22 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		public static float GetAutoAttackDamageOverride(this Obj_AI_Base Attacker, Obj_AI_Base Target, bool IncludePassive)
 		{
 			// in case of Bugs or not updated stuff inside the SDK
-
+			if (Attacker.Type == GameObjectType.AIHeroClient)
+			{
+				if (Target.NetworkId != Logic.LastAutoAttackTarget.NetworkId)
+				{
+					var attacker = (AIHeroClient) Attacker;
+					if (attacker.Hero == Champion.MissFortune && Target.Type == GameObjectType.AIHeroClient )
+						return Attacker.GetAutoAttackDamage(Target, IncludePassive) +
+						       Attacker.CalculateDamageOnUnit(Target, DamageType.Physical, Attacker.BaseAttackDamage * (0.5f + (0.5f / 17 * (attacker.Level - 1) * 0.95f)));
+					else
+					{
+						if (attacker.Hero == Champion.MissFortune && (Target.Type == GameObjectType.obj_AI_Minion || Target.Type == GameObjectType.obj_AI_Turret) )
+							return Attacker.GetAutoAttackDamage(Target, IncludePassive) +
+							       Attacker.CalculateDamageOnUnit(Target, DamageType.Physical, Attacker.BaseAttackDamage * (0.25f + (0.25f / 17 * (attacker.Level - 1) * 0.95f)));
+					}
+				}
+			}
 			return Attacker.GetAutoAttackDamage(Target, IncludePassive);
 		}
 

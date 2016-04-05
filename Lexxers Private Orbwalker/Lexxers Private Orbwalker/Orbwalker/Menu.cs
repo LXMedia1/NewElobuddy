@@ -36,9 +36,9 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			Config_Behavier.Add("interactRange", new Slider("Interact Range {0}", 350,0,800));
 
 			Config_Behavier.AddLabel("Movement Prediction: If Aktive will Semiautomatic your Movement on Melees (for Combo)");
-			Config_Behavier.Add("meleePrediction1", new CheckBox("Melee Movement Prediction VollAuto", false));
-			Config_Behavier.Add("meleePrediction2", new CheckBox("Melee Movement Prediction SemiAuto", false));
-			Config_Behavier.AddLabel("Catch Axes Draven: If Aktive Will Catch Axes Inside Circle");
+			Config_Behavier.Add("meleePrediction1", new CheckBox("Melee Movement Prediction Auto", false));
+			Config_Behavier.Add("meleePrediction2", new CheckBox("Melee Movement Prediction Semi-Auto", false));
+			Config_Behavier.AddLabel("Catch Axes Draven: If Aktive Will Catch Axes Inside Interact Range");
 			Config_Behavier.Add("CatchAxes", new CheckBox("Draven Catch Axes", true));
 			Config_Behavier.Add("CatchAxesW", new CheckBox("Use W for SafeCatch", true));
 

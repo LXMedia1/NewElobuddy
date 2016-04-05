@@ -43,18 +43,36 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 			// in case of Bugs or not updated stuff inside the SDK
 			if (Attacker.Type == GameObjectType.AIHeroClient)
 			{
-				if (Target.NetworkId != Logic.LastAutoAttackTarget.NetworkId)
+				var attacker = (AIHeroClient) Attacker;
+				switch (attacker.Hero)
 				{
-					var attacker = (AIHeroClient) Attacker;
-					if (attacker.Hero == Champion.MissFortune && Target.Type == GameObjectType.AIHeroClient )
-						return Attacker.GetAutoAttackDamage(Target, IncludePassive) +
-						       Attacker.CalculateDamageOnUnit(Target, DamageType.Physical, Attacker.BaseAttackDamage * (0.5f + (0.5f / 17 * (attacker.Level - 1) * 0.95f)));
-					else
-					{
-						if (attacker.Hero == Champion.MissFortune && (Target.Type == GameObjectType.obj_AI_Minion || Target.Type == GameObjectType.obj_AI_Turret) )
-							return Attacker.GetAutoAttackDamage(Target, IncludePassive) +
-							       Attacker.CalculateDamageOnUnit(Target, DamageType.Physical, Attacker.BaseAttackDamage * (0.25f + (0.25f / 17 * (attacker.Level - 1) * 0.95f)));
-					}
+					case Champion.MissFortune:
+						switch (Target.Type)
+						{
+							case GameObjectType.AIHeroClient:
+								return Attacker.GetAutoAttackDamage(Target, IncludePassive) +
+									   Attacker.CalculateDamageOnUnit(Target, DamageType.Physical,
+										   Attacker.BaseAttackDamage * (0.5f + (0.5f / 17 * (attacker.Level - 1) * 0.95f)));
+							case GameObjectType.obj_AI_Minion:
+							case GameObjectType.obj_AI_Turret:
+								return Attacker.GetAutoAttackDamage(Target, IncludePassive) +
+									   Attacker.CalculateDamageOnUnit(Target, DamageType.Physical,
+										   Attacker.BaseAttackDamage * (0.25f + (0.25f / 17 * (attacker.Level - 1) * 0.95f)));
+						}
+						break;
+					case Champion.Thresh:
+						if (Attacker.Spellbook.GetSpell(SpellSlot.E).Level >= 1)
+						{
+
+							var stacks = Attacker.GetBuff("Threshqpassive").Count;
+							var souls = Attacker.HasBuff("threshpassivesoulsgain") ? Attacker.GetBuff("threshpassivesoulsgain").Count : 0;
+							float[] passivepercent = { 0.2f, 0.275f, 0.35f, 0.425f, 0.5f };
+							return Attacker.CalculateDamageOnUnit(Target, DamageType.Physical, Attacker.BaseAttackDamage) +
+							       Attacker.CalculateDamageOnUnit(Target, DamageType.Magical,
+								       (stacks*passivepercent[Attacker.Spellbook.GetSpell(SpellSlot.E).Level])*attacker.BaseAttackDamage + souls);
+						}
+						break;
+
 				}
 			}
 			return Attacker.GetAutoAttackDamage(Target, IncludePassive);

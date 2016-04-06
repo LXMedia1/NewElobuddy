@@ -65,14 +65,14 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 						{
 							float passivePercent = 0;
 							if (Attacker.HasBuff("Threshqpassive1") && Attacker.HasBuff("Threshqpassive2") &&
-							    Attacker.HasBuff("Threshqpassive3") && Attacker.HasBuff("Threshqpassive4"))
+								Attacker.HasBuff("Threshqpassive3") && Attacker.HasBuff("Threshqpassive4"))
 							{
 								if (Attacker.HasBuff("Threshqpassive4"))
 									passivePercent = 1;
 								else
 								{
 									var timegone = Game.Time - Attacker.GetBuff("Threshqpassive").StartTime;
-									passivePercent = 10/timegone;
+									passivePercent = 10 / timegone - 0.05f;
 								}
 								if (passivePercent >= 1)
 									passivePercent = 1;

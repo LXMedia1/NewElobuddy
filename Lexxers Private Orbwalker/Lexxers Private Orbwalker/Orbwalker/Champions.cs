@@ -41,7 +41,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 		public static float GetAutoAttackDamageOverride(this Obj_AI_Base Attacker, Obj_AI_Base Target, bool IncludePassive)
 		{
 			// in case of Bugs or not updated stuff inside the SDK
-			if (Attacker.Type == GameObjectType.AIHeroClient)
+			if (Attacker != null && Target != null && Attacker.Type == GameObjectType.AIHeroClient)
 			{
 				var attacker = (AIHeroClient) Attacker;
 				switch (attacker.Hero)
@@ -64,7 +64,7 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 						if (Attacker.Spellbook.GetSpell(SpellSlot.E).Level >= 1)
 						{
 
-							var stacks = Attacker.GetBuff("Threshqpassive").Count;
+							var stacks = Attacker.HasBuff("Threshqpassive") ? Attacker.GetBuff("Threshqpassive").Count : 0;
 							var souls = Attacker.HasBuff("threshpassivesoulsgain") ? Attacker.GetBuff("threshpassivesoulsgain").Count : 0;
 							float[] passivepercent = { 0.2f, 0.275f, 0.35f, 0.425f, 0.5f };
 							return Attacker.CalculateDamageOnUnit(Target, DamageType.Physical, Attacker.BaseAttackDamage) +

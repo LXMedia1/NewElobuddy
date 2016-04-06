@@ -63,13 +63,26 @@ namespace Lexxers_Private_Orbwalker.Orbwalker
 					case Champion.Thresh:
 						if (Attacker.Spellbook.GetSpell(SpellSlot.E).Level >= 1)
 						{
+							float passivePercent = 0;
+							if (Attacker.HasBuff("Threshqpassive1") && Attacker.HasBuff("Threshqpassive2") &&
+							    Attacker.HasBuff("Threshqpassive3") && Attacker.HasBuff("Threshqpassive4"))
+							{
+								if (Attacker.HasBuff("Threshqpassive4"))
+									passivePercent = 1;
+								else
+								{
+									var timegone = Game.Time - Attacker.GetBuff("Threshqpassive").StartTime;
+									passivePercent = 10/timegone;
+								}
+								if (passivePercent >= 1)
+									passivePercent = 1;
 
-							var stacks = Attacker.HasBuff("Threshqpassive") ? Attacker.GetBuff("Threshqpassive").Count : 0;
+							}
 							var souls = Attacker.HasBuff("threshpassivesoulsgain") ? Attacker.GetBuff("threshpassivesoulsgain").Count : 0;
-							float[] passivepercent = { 0.2f, 0.275f, 0.35f, 0.425f, 0.5f };
+							float[] passive = { 0.8f, 1.1f, 1.4f, 1.7f, 2.0f };
 							return Attacker.CalculateDamageOnUnit(Target, DamageType.Physical, Attacker.BaseAttackDamage) +
 							       Attacker.CalculateDamageOnUnit(Target, DamageType.Magical,
-								       (stacks*passivepercent[Attacker.Spellbook.GetSpell(SpellSlot.E).Level])*attacker.BaseAttackDamage + souls);
+									   (passivePercent * passive[Attacker.Spellbook.GetSpell(SpellSlot.E).Level]) * attacker.BaseAttackDamage + souls);
 						}
 						break;
 
